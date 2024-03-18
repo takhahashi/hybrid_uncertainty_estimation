@@ -39,7 +39,8 @@ def init_wandb(directory, config):
 
     group_name = f"{task}|{model_name}|{strat_name}|{date}"
     run_name = f"{run_name}"
-
+    print('config:',config)
+    print()
     return wandb.init(
         group=group_name,
         name=run_name,
