@@ -42,12 +42,12 @@ def init_wandb(directory, config):
     print('config:',config)
     print()
     return wandb.init(
-        group=group_name,
-        name=run_name,
-        config=config,
-        # mode="offline",
-        job_type="train",
-        force=True,
-        tags=[strat_name, model_name, task],
-        mode="offline",
+        #group=group_name,
+        #name=run_name,
+        #config=config,
+        ## mode="offline",
+        #job_type="train",
+        #force=True,
+        #tags=[strat_name, model_name, task],
+        #mode="offline",
     )
