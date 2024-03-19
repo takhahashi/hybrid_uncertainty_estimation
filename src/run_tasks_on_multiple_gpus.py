@@ -1,4 +1,4 @@
-import pdb
+
 import hydra
 import os
 
@@ -23,7 +23,7 @@ def run_task(task):
     command = f"CUDA_VISIBLE_DEVICES={utils.WORKER_CUDA_DEVICE} HYDRA_CONFIG_PATH={task.config_path} {task.environ} python {task.command} repeat={task.repeat} {task_args}"  # hydra.run.dir={run_dir} output_dir={output_dir}"
 
     log.info(f"Command: {command}")
-    pdb.set_trace()
+    
     ret = os.system(command)
     ret = str(ret)
     log.info(f'Task "{task.name}" finished with return code: {ret}.')
@@ -48,10 +48,10 @@ def run_task_old(task):
 )
 def main(configs):
     os.chdir(hydra.utils.get_original_cwd())
-    #try:
-    utils.run_tasks(configs, run_task)
-    #except:
-    #    utils.run_tasks(configs, run_task_old)
+    try:
+        utils.run_tasks(configs, run_task)
+    except:
+        utils.run_tasks(configs, run_task_old)
 
 
 if __name__ == "__main__":

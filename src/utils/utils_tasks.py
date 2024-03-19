@@ -6,6 +6,7 @@ import os
 from omegaconf import DictConfig
 
 import logging
+import pbd
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ def run_tasks(config, f_task):
     tasks = repeat_tasks(tasks)
 
     pool = mp.Pool(len(cuda_devices), initializer=initialize_worker)
+    pdb.set_trace()
     try:
         pool.map(f_task, tasks)
 
