@@ -48,10 +48,10 @@ def run_task_old(task):
 )
 def main(configs):
     os.chdir(hydra.utils.get_original_cwd())
-    try:
-        utils.run_tasks(configs, run_task)
-    except:
-        utils.run_tasks(configs, run_task_old)
+    #try:
+    utils.run_tasks(configs, run_task)
+    #except:
+    #    utils.run_tasks(configs, run_task_old)
 
 
 if __name__ == "__main__":
