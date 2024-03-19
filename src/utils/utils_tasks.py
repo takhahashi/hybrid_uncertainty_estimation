@@ -6,7 +6,7 @@ import os
 from omegaconf import DictConfig
 
 import logging
-import pbd
+import pdb
 
 log = logging.getLogger(__name__)
 
