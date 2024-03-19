@@ -7,7 +7,6 @@ import utils.utils_tasks as utils
 from collections.abc import Iterable
 
 import logging
-import pdb
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ def train_models(config, work_dir):
 
     with open(config_path, "w") as f:
         yaml.dump(config_structure, f)
-    pdb.set_trace()
+
     run_tasks(config_path, config.cuda_devices)
 
 
