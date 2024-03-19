@@ -9,8 +9,6 @@ import pdb
 
 log = logging.getLogger(__name__)
 
-
-CUDA_DEVICES = mp.Queue()
 WORKER_CUDA_DEVICE = None
 
 
@@ -73,7 +71,6 @@ def run_tasks(config, f_task):
 
     tasks = repeat_tasks(tasks)
 
-    
     for task in tasks:
         f_task(task)
 
