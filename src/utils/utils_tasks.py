@@ -1,3 +1,4 @@
+import multiprocessing as mp
 from collections.abc import Iterable
 import copy
 import os
@@ -5,10 +6,10 @@ import os
 from omegaconf import DictConfig
 
 import logging
-import pdb
-
 log = logging.getLogger(__name__)
 
+
+CUDA_DEVICES = mp.Queue()
 WORKER_CUDA_DEVICE = None
 
 
@@ -36,6 +37,16 @@ def repeat_tasks(tasks):
 
 def run_tasks(config, f_task):
     global CUDA_QUEUE
+
+    if not isinstance(config.cuda_devices, Iterable):
+        cuda_devices = [config.cuda_devices]
+    else:
+        cuda_devices = config.cuda_devices
+
+    log.info(f"Cuda devices: {cuda_devices}")
+
+    for cuda_device in cuda_devices:
+        CUDA_DEVICES.put(cuda_device)
 
     log.info("All tasks: {}".format(str([t.name for t in config.tasks])))
     if "task_names" in config and config.task_names:
