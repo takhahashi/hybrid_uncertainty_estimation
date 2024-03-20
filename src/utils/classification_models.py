@@ -39,6 +39,8 @@ import logging
 import os
 from pathlib import Path
 
+from safetensors.torch import load_file
+
 log = logging.getLogger(__name__)
 
 
@@ -94,8 +96,7 @@ def load_distilbert_sn_head(model_path_or_name, model):
 
 
 def load_bert_sn_pooler(model_path_or_name, model):
-
-    model_full = torch.load(model_path_or_name + "/model.safetensors")
+    model_full = load_file(model_path_or_name + "/model.safetensors")
     model.bert.pooler.dense.weight_orig.data = model_full[
         "bert.pooler.dense.weight_orig"
     ].data
