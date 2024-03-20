@@ -6,6 +6,7 @@ import os
 from omegaconf import DictConfig
 
 import logging
+
 log = logging.getLogger(__name__)
 
 
@@ -72,6 +73,7 @@ def run_tasks(config, f_task):
 
     tasks = repeat_tasks(tasks)
 
+    initialize_worker()
     for task in tasks:
         f_task(task)
 
