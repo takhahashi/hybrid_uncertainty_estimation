@@ -464,7 +464,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         if config.do_eval:
             evaluation_metrics = trainer.evaluate()
         trainer.save_model(work_dir)
-        tokenizer.save_pretrained(work_dir)
+        #tokenizer.save_pretrained(work_dir)
 
     #################### Predicting##########################
 
