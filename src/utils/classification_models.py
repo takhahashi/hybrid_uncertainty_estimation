@@ -47,7 +47,10 @@ def build_model(model_class, model_path_or_name, **kwargs):
 
 
 def load_electra_sn_encoder(model_path_or_name, model):
-    model_full = torch.load(model_path_or_name + "/pytorch_model.bin")
+
+    with open(model_path_or_name + "/model.safetensors", "rb") as f:
+        data = f.read()
+    model_full = torch.load(data)
 
     for i, electralayer in enumerate(model.electra.encoder.layer):
         electralayer_name = f"electra.encoder.layer.{i}.output.dense"
@@ -91,7 +94,9 @@ def load_distilbert_sn_head(model_path_or_name, model):
 
 
 def load_bert_sn_pooler(model_path_or_name, model):
-    model_full = torch.load(model_path_or_name + "/pytorch_model.bin")
+    with open(model_path_or_name + "/model.safetensors", "rb") as f:
+        data = f.read()
+    model_full = torch.load(data)
     model.bert.pooler.dense.weight_orig.data = model_full[
         "bert.pooler.dense.weight_orig"
     ].data
