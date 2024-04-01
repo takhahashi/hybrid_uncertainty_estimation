@@ -198,13 +198,13 @@ def get_model_friendly_scores(config, score_array, high, low):
 def load_asap(config):
     low, high = asap_ranges[config.data.prompt_id]
 
-    train_datapath = config.data.datapath + f'/fold_{config.data.fold}' + '/train.tsv'
+    train_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/train.tsv'
     train_dataf = pd.read_table(train_datapath, sep='\t')
     train_p = train_dataf[train_dataf["essay_set"] == config.data.prompt_id]
     train_x = train_p["essay"].tolist()
     train_y = get_model_friendly_scores(config, np.array(train_p["domain1_score"]), high, low).tolist()
 
-    validation_datapath = config.data.datapath + f'/fold_{config.data.fold}' + '/dev.tsv'
+    validation_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/dev.tsv'
     validation_dataf = pd.read_table(validation_datapath, sep='\t')
     validation_p = validation_dataf[validation_dataf["essay_set"] == config.data.prompt_id]
     validation_x = validation_p["essay"].tolist()
