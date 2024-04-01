@@ -72,6 +72,7 @@ task_to_keys = {
     "moji_raw": ("text", None),
     "trustpilot": ("text", "avg_embedding"),
     "jigsaw_race": ("comment_text", "bert_avg_SE"),
+    "asap": ("text", "avg_embedding"),
 }
 
 asap_ranges = {
