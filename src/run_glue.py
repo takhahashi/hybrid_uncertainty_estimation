@@ -309,6 +309,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     num_labels = len(label_list)
     log.info(f"Number of labels: {num_labels}")
+    pdb.set_trace()
 
     ################ Loading model #######################
 
@@ -371,7 +372,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     if "idx" in datasets.column_names["train"]:
         datasets = datasets.remove_columns("idx")
-    pdb.set_trace()
+
 
     ################### Training ####################################
     if config.reset_params:
