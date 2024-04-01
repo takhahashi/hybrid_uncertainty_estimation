@@ -21,6 +21,7 @@ import time
 from utils.utils_wandb import init_wandb, wandb
 
 from ue4nlp.text_classifier import TextClassifier
+import pdb
 
 from transformers import (
     AutoConfig,
@@ -370,6 +371,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     if "idx" in datasets.column_names["train"]:
         datasets = datasets.remove_columns("idx")
+    pdb.set_trace()
 
     ################### Training ####################################
     if config.reset_params:
