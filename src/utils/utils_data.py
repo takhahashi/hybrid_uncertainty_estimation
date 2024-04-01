@@ -74,6 +74,18 @@ task_to_keys = {
     "jigsaw_race": ("comment_text", "bert_avg_SE"),
 }
 
+asap_ranges = {
+	0: (0, 60),
+	1: (2,12),
+	2: (1,6),
+	3: (0,3),
+	4: (0,3),
+	5: (0,4),
+	6: (0,4),
+	7: (0,30),
+	8: (0,60)
+}
+
 
 def load_data(config):
     if config.data.task_name == "20newsgroups":
@@ -124,6 +136,8 @@ def load_data(config):
         datasets = load_dataset(
             "glue", config.data.task_name, cache_dir=config.cache_dir
         )
+    elif "asap" in config.data.task_name:
+        datasets = load_asap(config)
     else:
         raise ValueError(f"Cannot load dataset with this name: {config.data.task_name}")
     if config.data.get("balance_classes", False):
@@ -172,6 +186,36 @@ def make_data_similarity(dataset):
 
     return datasets
 
+def get_model_friendly_scores(config, score_array, high, low):
+    regression = ("regression" in config.data.keys()) and bool(config.data.regression)
+    if regression:
+        score_array = (np.array(score_array) - low) / (high - low)
+    else:
+        score_array = score_array - low
+    return score_array
+
+def load_asap(config):
+    low, high = asap_ranges[config.data.prompt_id]
+
+    train_datapath = config.data.datapath + f'/fold_{config.data.fold}' + '/train.tsv'
+    train_dataf = pd.read_table(train_datapath, sep='\t')
+    train_p = train_dataf[train_dataf["essay_set"] == config.data.prompt_id]
+    train_x = train_p["essay"].tolist()
+    train_y = get_model_friendly_scores(config, np.array(train_p["domain1_score"]), high, low).tolist()
+
+    validation_datapath = config.data.datapath + f'/fold_{config.data.fold}' + '/dev.tsv'
+    validation_dataf = pd.read_table(validation_datapath, sep='\t')
+    validation_p = validation_dataf[validation_dataf["essay_set"] == config.data.prompt_id]
+    validation_x = validation_p["essay"].tolist()
+    validation_y = get_model_friendly_scores(config, np.array(validation_p["domain1_score"]), high, low).tolist()
+
+    datasets = DatasetDict(
+        {
+            "train": Dataset.from_dict({"text": train_x, "label": train_y}),
+            "validation": Dataset.from_dict({"text": validation_x, "label": validation_y}),
+        }
+    )
+    return datasets
 
 def load_ag_news(config):
     dataset = load_dataset("ag_news", cache_dir=config.cache_dir)
