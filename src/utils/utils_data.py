@@ -210,10 +210,16 @@ def load_asap(config):
     validation_x = validation_p["essay"].tolist()
     validation_y = get_model_friendly_scores(config, np.array(validation_p["domain1_score"]), high, low).tolist()
 
+    test_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/test.tsv'
+    test_dataf = pd.read_table(test_datapath, sep='\t')
+    test_p = test_dataf[test_dataf["essay_set"] == config.data.prompt_id]
+    test_x = test_p["essay"].tolist()
+    test_y = get_model_friendly_scores(config, np.array(test_p["domain1_score"]), high, low).tolist()
     datasets = DatasetDict(
         {
             "train": Dataset.from_dict({"text": train_x, "label": train_y}),
             "validation": Dataset.from_dict({"text": validation_x, "label": validation_y}),
+            "test": Dataset.from_dict({"text": test_x, "label": test_y}),
         }
     )
     return datasets
@@ -1779,3 +1785,24 @@ def load_jigsaw_race(config):
             )
     datasets = DatasetDict(datasets_dict)
     return datasets
+
+def simple_collate_fn(list_of_data):
+    pad_max_len = torch.tensor(0)
+    for data in list_of_data:
+        if(torch.count_nonzero(data['attention_mask']) > pad_max_len):
+            pad_max_len = torch.count_nonzero(data['attention_mask'])
+    in_ids, token_type, atten_mask, labels = [], [], [], []
+    for data in list_of_data:
+        in_ids.append(data['input_ids'][:pad_max_len])
+        token_type.append(data['token_type_ids'][:pad_max_len])
+        atten_mask.append(data['attention_mask'][:pad_max_len])
+        labels.append(data['label'])
+    batched_tensor = {}
+    batched_tensor['input_ids'] = torch.stack(in_ids)
+    batched_tensor['token_type_ids'] = torch.stack(token_type)
+    batched_tensor['attention_mask'] = torch.stack(atten_mask)
+    if labels[0].shape  != torch.tensor(1).shape:
+        batched_tensor['label'] = torch.stack(labels)
+    else:
+        batched_tensor['label'] = torch.tensor(labels)
+    return batched_tensor

@@ -45,6 +45,7 @@ from utils.utils_data import (
     glue_datasets,
     make_data_similarity,
     task_to_keys,
+    simple_collate_fn,
 )
 from utils.utils_models import create_model
 
@@ -309,7 +310,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     num_labels = len(label_list)
     log.info(f"Number of labels: {num_labels}")
-    pdb.set_trace()
 
     ################ Loading model #######################
 
@@ -482,9 +482,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         if data_args.task_name not in eval_datasets_list
         else config.data.validation_name
     )
-
     eval_dataset = (
         datasets[validation_name] if config.do_eval or config.do_ue_estimate else None
+    )
+    test_dataset = (
+        datasets["test"] if config.do_eval or config.do_ue_estimate else None
     )
 
     if data_args.task_name in glue_datasets:
@@ -520,6 +522,12 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         training_args.logging_steps = training_args.warmup_steps
         training_args.weight_decay_rate = training_args.weight_decay
 
+    collate_fn = ("collate_fn" in config.data.keys()) and bool(config.data.collate_fn)
+    if collate_fn:
+        data_collater = simple_collate_fn
+    else:
+        data_collater = None
+
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
 
@@ -533,6 +541,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         train_dataset,
         eval_dataset,
         metric_fn,
+        data_collater = data_collater
     )
     if config.do_train:
         start = time.time()
@@ -556,7 +565,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             model,
             tokenizer,
             trainer,
-            eval_dataset,
+            test_dataset,
             train_dataset,
             calibration_dataset,
             metric,

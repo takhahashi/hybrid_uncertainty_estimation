@@ -23,7 +23,7 @@ def run_task(task):
     # run_dir = "'${output_dir}/${data.task_name}/${ue.ue_type}/${training.seed}/${seed}'"
 
     command = f"CUDA_VISIBLE_DEVICES={utils.WORKER_CUDA_DEVICE} HYDRA_CONFIG_PATH={task.config_path} {task.environ} python {task.command} repeat={task.repeat} {task_args}"  # hydra.run.dir={run_dir} output_dir={output_dir}"
-
+    pdb.set_trace()
     log.info(f"Command: {command}")
     
     ret = os.system(command)

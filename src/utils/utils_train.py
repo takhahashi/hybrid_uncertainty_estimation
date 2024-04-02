@@ -1,6 +1,7 @@
 from transformers import TrainingArguments
 from dataclasses import dataclass, field
 from typing import Optional
+import torch
 
 from transformers.file_utils import add_start_docstrings
 from transformers import Trainer
