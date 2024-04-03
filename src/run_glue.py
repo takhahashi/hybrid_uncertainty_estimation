@@ -531,11 +531,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             training_args.logging_steps = training_args.warmup_steps
         training_args.weight_decay_rate = training_args.weight_decay
 
-    collate_fn = ("collate_fn" in config.data.keys()) and bool(config.data.collate_fn)
-    if collate_fn:
-        data_collater = simple_collate_fn
+    collator = ("collator" in config.data.keys()) and bool(config.data.collator)
+    if collator:
+        data_collator = simple_collate_fn
     else:
-        data_collater = None
+        data_collator = None
     amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
     if amp:
         training_args = update_config(training_args, {'fp16':True})
@@ -557,7 +557,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         train_dataset,
         eval_dataset,
         metric_fn,
-        data_collater = data_collater,
+        data_collator = data_collator,
         callbacks=[earlystopping],
     )
     if config.do_train:
