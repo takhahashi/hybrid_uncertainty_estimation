@@ -15,7 +15,7 @@ from torch.utils.data import Subset
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from functools import reduce
-from utils_data_score_range import upper_score_dic, asap_ranges
+from utils.utils_data_score_range import upper_score_dic, asap_ranges
 
 import logging
 
