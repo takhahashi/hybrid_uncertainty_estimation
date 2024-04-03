@@ -631,6 +631,9 @@ def main(config):
     auto_generated_dir = os.getcwd()
     log.info(f"Work dir: {auto_generated_dir}")
     os.chdir(hydra.utils.get_original_cwd())
+    print('----------------')
+    print(config)
+    print('----------------')
 
     init_wandb(auto_generated_dir, config)
 
