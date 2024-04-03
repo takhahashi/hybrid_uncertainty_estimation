@@ -11,6 +11,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.preprocessing import LabelEncoder
 import pytreebank
 from datasets.arrow_dataset import Dataset as ArrowDataset
+import torch
 from torch.utils.data import Subset
 import pandas as pd
 from sklearn.model_selection import train_test_split
