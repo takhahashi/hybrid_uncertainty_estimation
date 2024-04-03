@@ -517,7 +517,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     training_args.save_steps = 0
     if config.do_train:
-        if ('warmup' in training_args.keys()) and bool(training_args.warmup):
+        if ('warmup' in config.training.keys()) and bool(config.training.warmup):
             training_args.warmup_steps = max(
                 1,
                 int(
