@@ -542,6 +542,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
+        training_args = update_config(training_args, {'load_best_model_at_end':True})
     else:
         earlystopping = None
     use_sngp = ue_args.ue_type == "sngp"
