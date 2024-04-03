@@ -33,6 +33,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
     ElectraForSequenceClassification,
+    EarlyStoppingCallback,
 )
 from datasets import load_metric, load_dataset, Dataset
 from sklearn.model_selection import train_test_split
@@ -46,6 +47,7 @@ from utils.utils_data import (
     make_data_similarity,
     task_to_keys,
     simple_collate_fn,
+    get_score_range,
 )
 from utils.utils_models import create_model
 
@@ -308,7 +310,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         label_list = datasets["train"].unique("label")
         label_list.sort()  # Let's sort it for determinism
 
-    num_labels = len(label_list)
+    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+        low, high = get_score_range(config.data.task_name, config.data.prompt_id)
+        num_labels = high - low + 1
+    else:
+        num_labels = len(label_list)
     log.info(f"Number of labels: {num_labels}")
 
     ################ Loading model #######################
@@ -509,17 +515,18 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     training_args.save_steps = 0
     if config.do_train:
-        training_args.warmup_steps = max(
-            1,
-            int(
-                training_args.warmup_ratio
-                * len(train_dataset)
-                * training_args.num_train_epochs
-                / training_args.train_batch_size
-            ),
-        )
-        log.info(f"Warmup steps: {training_args.warmup_steps}")
-        training_args.logging_steps = training_args.warmup_steps
+        if ('warmup' in training_args.keys()) and bool(training_args.warmup):
+            training_args.warmup_steps = max(
+                1,
+                int(
+                    training_args.warmup_ratio
+                    * len(train_dataset)
+                    * training_args.num_train_epochs
+                    / training_args.train_batch_size
+                ),
+            )
+            log.info(f"Warmup steps: {training_args.warmup_steps}")
+            training_args.logging_steps = training_args.warmup_steps
         training_args.weight_decay_rate = training_args.weight_decay
 
     collate_fn = ("collate_fn" in config.data.keys()) and bool(config.data.collate_fn)
@@ -527,7 +534,14 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         data_collater = simple_collate_fn
     else:
         data_collater = None
+    amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
+    if amp:
+        training_args = update_config(training_args, {'fp16':True})
 
+    if "patience" in config.training.keys():
+        earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
+    else:
+        earlystopping = None
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
 
@@ -541,7 +555,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         train_dataset,
         eval_dataset,
         metric_fn,
-        data_collater = data_collater
+        data_collater = data_collater,
+        callbacks=[earlystopping],
     )
     if config.do_train:
         start = time.time()

@@ -40,7 +40,15 @@ def create_tokenizer(model_args, config):
 
 
 def create_model(num_labels, model_args, data_args, ue_args, config):
-    fairlib_args = config.get("fairlib", None)
+    """
+    if data_args.task_name == 'asap' or data_args.task_name == 'riken':
+        model_name = model_args.model_name
+        model_path = model_args.model_path
+        
+
+        model.load_state_dict(torch.load(cfg.path.model_save_path))
+    """
+    fairlib_args = config.get("fairlib", None)  
     base_model_name = (
         model_args.model_name_or_path
         if fairlib_args is None

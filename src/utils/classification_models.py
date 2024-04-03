@@ -168,6 +168,16 @@ def create_bert(
             log.info("Replaced BERT Pooler with SN")
             if config.do_eval and not (config.do_train):
                 load_bert_sn_pooler(model_path_or_name, model)
+            """
+        elif config.data.task_name == 'asap' or config.data.task_name == 'riken':
+            if model_config.inf_type == 'regression':
+                raise ValueError(f"regression regression regression regression")
+            else:
+                model = build_model(
+                AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
+                )
+                model.load_state_dict(torch.load(config.model.model_path))
+            """ 
         else:
             model = build_model(
                 AutoModelForSequenceClassification, model_path_or_name, **model_kwargs

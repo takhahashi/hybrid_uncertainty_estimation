@@ -15,6 +15,7 @@ from torch.utils.data import Subset
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from functools import reduce
+from utils_data_score_range import upper_score_dic, asap_ranges
 
 import logging
 
@@ -75,17 +76,16 @@ task_to_keys = {
     "asap": ("text", "avg_embedding"),
 }
 
-asap_ranges = {
-	0: (0, 60),
-	1: (2,12),
-	2: (1,6),
-	3: (0,3),
-	4: (0,3),
-	5: (0,4),
-	6: (0,4),
-	7: (0,30),
-	8: (0,60)
-}
+def get_score_range(task_name, prompt_id):
+    if task_name == 'asap':
+        low, high = asap_ranges[int(prompt_id)]
+    elif task_name == 'riken':
+        high = upper_score_dic[prompt_id]
+        low = 0
+    else:
+        raise(ValueError(f"Cannot get low, high score with this name: {task_name}"))
+    return low, high
+
 
 
 def load_data(config):
