@@ -20,6 +20,7 @@ def get_trainer(
     eval_dataset,
     metric_fn,
     data_collator=None,
+    callbacks=None,
 ) -> "Trainer":
     training_args.save_total_limit = 1
     training_args.save_steps = 1e5
@@ -32,6 +33,7 @@ def get_trainer(
             eval_dataset=eval_dataset,
             compute_metrics=metric_fn,
             data_collator=data_collator,
+            callbacks=callbacks,
         )
     elif use_sngp:
         if use_selective:
