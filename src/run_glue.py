@@ -335,6 +335,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
                 "rob_gender",
                 "rob_area",
                 "sepsis_ethnicity",
+                "asap",
+                "riken"
             ]
         )
         else sentence2_key
