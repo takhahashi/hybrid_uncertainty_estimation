@@ -627,9 +627,6 @@ def fix_config(config):
     config_name=get_config()[1],
 )
 def main(config):
-    print('----------------')
-    print(config)
-    print('----------------')
     os.environ["WANDB_WATCH"] = "False"  # To disable Huggingface logging
     auto_generated_dir = os.getcwd()
     log.info(f"Work dir: {auto_generated_dir}")
