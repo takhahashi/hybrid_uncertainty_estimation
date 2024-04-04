@@ -513,7 +513,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         is_regression, is_selectivenet, metric, accuracy_metric, p
     )
 
-    training_args.save_steps = 0
+    #training_args.save_steps = 0
     if config.do_train:
         if ('warmup' in config.training.keys()) and bool(config.training.warmup):
             training_args.warmup_steps = max(
@@ -537,14 +537,18 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
     if amp:
         training_args = update_config(training_args, {'fp16':True})
-
+    """
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
         training_args = update_config(training_args, {'load_best_model_at_end':True})
-        training_args = update_config(training_args, {'metric_for_best_model':'loss'})
         training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
     else:
         earlystopping = None
+    """
+    traning_args = update_config(training_args, {'strategy':'epoch'})
+    training_args = update_config(training_args, {'load_best_model_at_end':True})
+    training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
+
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
 
@@ -559,7 +563,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         eval_dataset,
         metric_fn,
         data_collator = data_collator,
-        callbacks=[earlystopping],
+        #callbacks=[earlystopping],
     )
     if config.do_train:
         start = time.time()
