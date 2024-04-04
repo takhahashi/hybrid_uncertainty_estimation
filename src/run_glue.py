@@ -490,9 +490,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         if data_args.task_name not in eval_datasets_list
         else config.data.validation_name
     )
-    eval_dataset = (
-        datasets[validation_name] if config.do_eval or config.do_ue_estimate else None
-    )
+    eval_dataset = datasets[validation_name]
     test_dataset = (
         datasets["test"] if config.do_eval or config.do_ue_estimate else None
     )
