@@ -1804,7 +1804,7 @@ def simple_collate_fn(list_of_data):
     batched_tensor['token_type_ids'] = torch.stack(token_type)
     batched_tensor['attention_mask'] = torch.stack(atten_mask)
     if labels[0].shape  != torch.tensor(1).shape:
-        batched_tensor['label'] = torch.stack(labels)
+        batched_tensor['labels'] = torch.stack(labels)
     else:
-        batched_tensor['label'] = torch.tensor(labels)
+        batched_tensor['labels'] = torch.tensor(labels)
     return batched_tensor
