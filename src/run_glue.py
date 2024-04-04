@@ -230,6 +230,7 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
+        print(res[2:])
         preds, probs = res[:2]
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
@@ -515,6 +516,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     #training_args.save_steps = 0
     if config.do_train:
+        """
         if ('warmup' in config.training.keys()) and bool(config.training.warmup):
             training_args.warmup_steps = max(
                 1,
@@ -527,6 +529,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             )
             log.info(f"Warmup steps: {training_args.warmup_steps}")
             training_args.logging_steps = training_args.warmup_steps
+        """
         training_args.weight_decay_rate = training_args.weight_decay
 
     collator = ("collator" in config.data.keys()) and bool(config.data.collator)
@@ -587,7 +590,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             model,
             tokenizer,
             trainer,
-            test_dataset,
+            eval_dataset, ##############
             train_dataset,
             calibration_dataset,
             metric,
