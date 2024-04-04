@@ -545,7 +545,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     else:
         earlystopping = None
     """
-    traning_args = update_config(training_args, {'strategy':'epoch'})
+    training_args = update_config(training_args, {'strategy':'epoch'})
     training_args = update_config(training_args, {'load_best_model_at_end':True})
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
 
