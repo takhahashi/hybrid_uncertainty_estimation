@@ -102,9 +102,6 @@ def get_config():
     except:
         path = os.path.dirname(os.environ["HYDRA_CONFIG_PATH"])
         name = os.path.basename(os.environ["HYDRA_CONFIG_PATH"])
-    print('----------')
-    print(path, name)
-    print('----------')
     return path, name
 
 
