@@ -40,6 +40,8 @@ from utils.utils_data import (
     glue_datasets,
     make_data_similarity,
     task_to_keys,
+    simple_collate_fn,
+    get_score_range,
 )
 from utils.utils_models import create_model
 from ue4nlp.transformers_regularized import SelectiveTrainer
@@ -264,7 +266,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         label_list = datasets["train"].unique("label")
         label_list.sort()  # Let's sort it for determinism
 
-    num_labels = len(label_list)
+    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+        low, high = get_score_range(config.data.task_name, config.data.prompt_id)
+        num_labels = high - low + 1
+    else:
+        num_labels = len(label_list)
     log.info(f"Number of labels: {num_labels}")
 
     ################ Loading model #######################
@@ -276,7 +282,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     sentence1_key, sentence2_key = task_to_keys[data_args.task_name]
     sentence2_key = (
         None
-        if (config.data.task_name in ["bios", "trustpilot", "jigsaw_race"])
+        if (config.data.task_name in ["bios", "trustpilot", "jigsaw_race", "sepsis_ethnicity", "asap", "riken"])
         else sentence2_key
     )
     max_seq_length = min(data_args.max_seq_length, tokenizer.model_max_length)
@@ -372,20 +378,23 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         calibration_dataset = torch.utils.data.Subset(
             train_dataset, calibration_indexes
         )
-        eval_dataset = torch.utils.data.Subset(train_dataset, eval_indexes)
-        train_dataset = torch.utils.data.Subset(train_dataset, train_indexes)
-
-        with open(Path(work_dir) / "calibration_indexes.pkl", "wb") as f:
-            pickle.dump(calibration_indexes, f)
-        with open(Path(work_dir) / "training_indexes.pkl", "wb") as f:
-            pickle.dump(train_indexes, f)
-        with open(Path(work_dir) / "eval_indexes.pkl", "wb") as f:
-            pickle.dump(eval_indexes, f)
+        if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+            eval_dataset = datasets["validation"]
+        else:
+            eval_dataset = torch.utils.data.Subset(train_dataset, eval_indexes)
+            train_dataset = torch.utils.data.Subset(train_dataset, train_indexes)
+        if config.data.task_name != 'asap' and config.data.task_name != 'riken':
+            with open(Path(work_dir) / "calibration_indexes.pkl", "wb") as f:
+                pickle.dump(calibration_indexes, f)
+            with open(Path(work_dir) / "training_indexes.pkl", "wb") as f:
+                pickle.dump(train_indexes, f)
+            with open(Path(work_dir) / "eval_indexes.pkl", "wb") as f:
+                pickle.dump(eval_indexes, f)
 
         log.info(f"Training dataset size: {len(train_dataset)}")
         log.info(f"Calibration dataset size: {len(calibration_dataset)}")
-        log.info(f"Eval dataset size: {len(eval_indexes)}")
-
+        log.info(f"Eval dataset size: {len(eval_dataset)}")
+    
     elif (
         config.ue.dropout_type == "DPP" and config.ue.dropout.dry_run_dataset != "eval"
     ) or (config.do_ue_estimate):
@@ -430,6 +439,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
 
     training_args.save_steps = 0
     if config.do_train:
+        """
         training_args.warmup_steps = int(
             training_args.warmup_ratio  # TODO:
             * len(train_dataset)
@@ -438,10 +448,21 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         )
         log.info(f"Warmup steps: {training_args.warmup_steps}")
         training_args.logging_steps = training_args.warmup_steps
+        """
         training_args.weight_decay_rate = training_args.weight_decay
-
+    collator = ("collator" in config.data.keys()) and bool(config.data.collator)
+    if collator:
+        data_collator = simple_collate_fn
+    else:
+        data_collator = None
+    amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
+    if amp:
+        training_args = update_config(training_args, {'fp16':True})
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
+    training_args = update_config(training_args, {'strategy':'epoch'})
+    training_args = update_config(training_args, {'load_best_model_at_end':True})
+    training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
 
     #################### Training ##########################
     trainer = get_trainer(
@@ -453,6 +474,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         train_dataset,
         eval_dataset,
         metric_fn,
+        data_collator = data_collator,
     )
     if config.do_train:
         trainer.train(
