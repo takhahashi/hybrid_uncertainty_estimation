@@ -286,6 +286,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         else sentence2_key
     )
     max_seq_length = min(data_args.max_seq_length, tokenizer.model_max_length)
+    print('------------------max_seq_len----------------:',max_seq_length)
+    
 
     label_to_id = None
     if (
