@@ -12,7 +12,7 @@ data:
     task_name: 'asap'
     prompt_id: 1
     fold: 0
-    subsample_perc: 0.2
+    subsample_perc: 0.0
     max_seq_length: 512
     validation_subsample: 0.0
     validation_seed: 42

@@ -22,6 +22,7 @@ from utils.utils_inference import is_custom_head, unpad_features, pad_scores
 import copy
 from scipy.stats import rankdata
 import logging
+import pdb
 
 log = logging.getLogger()
 
@@ -299,6 +300,7 @@ class UeEstimatorHybrid:
             end_1 = time.time()
 
             eval_results[f"hue_uncertainty_{hue_version}"] = hue.tolist()
+        pdb.set_trace()
 
         sum_inf_time = epistemic_time + (end_1 - start)
         eval_results["ue_time"] = sum_inf_time
