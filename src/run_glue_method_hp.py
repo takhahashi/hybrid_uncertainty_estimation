@@ -29,6 +29,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
     ElectraForSequenceClassification,
+    EarlyStoppingCallback,
 )
 from datasets import load_metric, load_dataset
 from sklearn.model_selection import train_test_split
@@ -462,9 +463,14 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         training_args = update_config(training_args, {'fp16':True})
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
+    
     training_args = update_config(training_args, {'strategy':'epoch'})
     training_args = update_config(training_args, {'load_best_model_at_end':True})
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
+    if "patience" in config.training.keys():
+        earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
+    else:
+        earlystopping = None
 
     #################### Training ##########################
     trainer = get_trainer(
@@ -477,6 +483,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         eval_dataset,
         metric_fn,
         data_collator = data_collator,
+        callbacks=[earlystopping],
     )
     if config.do_train:
         trainer.train(
