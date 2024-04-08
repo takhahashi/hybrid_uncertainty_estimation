@@ -470,8 +470,9 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
         training_args = update_config(training_args, {'metric_for_best_model':'loss'})
+        callbacks = [earlystopping]
     else:
-        earlystopping = None
+        callbacks = None
 
     #################### Training ##########################
     trainer = get_trainer(
@@ -484,7 +485,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         eval_dataset,
         metric_fn,
         data_collator = data_collator,
-        callbacks=[earlystopping],
+        callbacks=callbacks,
     )
     if config.do_train:
         trainer.train(
