@@ -259,10 +259,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     log.info("Load dataset.")
     datasets = load_data(config)
     log.info("Done with loading the dataset.")
-    print('-----------------------SHOW DATA----------------------------------')
-    print(datasets['train'][0])
-    print(datasets['validation'][0])
-    print('------------------------------------------------------------------')
 
     # Labels
     if data_args.task_name in glue_datasets:
