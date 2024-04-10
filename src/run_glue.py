@@ -303,10 +303,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         log.info("Make dataset to check similarity.")
         datasets = make_data_similarity(datasets)
     log.info("Done with loading the dataset.")
-    print('-----------------------SHOW DATA----------------------------------')
-    log.info(f'train_dataset_0:{datasets['train'][0]}')
-    log.info(f'dev_dataset_0:{datasets['validation'][0]}')
-    print('------------------------------------------------------------------')
 
     # Labels
     if data_args.task_name in glue_datasets:
