@@ -304,8 +304,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         datasets = make_data_similarity(datasets)
     log.info("Done with loading the dataset.")
     print('-----------------------SHOW DATA----------------------------------')
-    print(datasets['train'][0])
-    print(datasets['validation'][0])
+    log.info(f'train_dataset_0:{datasets['train'][0]}')
+    log.info(f'dev_dataset_0:{datasets['validation'][0]}')
     print('------------------------------------------------------------------')
 
     # Labels
