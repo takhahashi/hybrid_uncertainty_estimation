@@ -1,7 +1,8 @@
 hydra:
-  run:
-    dir: ${output_dir}/${data.task_name}/${ue.ue_type}_${ue.dropout_subs}/${data.subsample_perc}/${suffix}/${now:%Y-%m-%d}/${now:%H-%M-%S}-${repeat}
-    
+  sweep:
+    dir: /content/drive/MyDrive/workdir/run_train_models_method_hp/bert_raw_sn/models/asap/prompt_id_${data.prompt_id}
+    subdir: fold_${data.fold}
+
 model:
     model_name_or_path: 'google/electra-base-discriminator'
 
