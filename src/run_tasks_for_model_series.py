@@ -80,6 +80,9 @@ def run_glue_for_model_series_fast(config, work_dir):
         args_str += f"output_dir={output_dir}"
         args_str += " "
         args_str += " do_train=False do_eval=True "
+        if 'asap' in config.config_path:
+            args_str += f"data.prompt_id={config.model_series_dir[-1]}"
+            args_str += f"data.fold={model_dir_name[-1]}"
 
         task = {
             "config_path": config.config_path,

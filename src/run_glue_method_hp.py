@@ -250,6 +250,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     model_args = config.model
 
     log.info(f"Seed: {config.seed}")
+    if config.seed 
     set_seed(config.seed)
     random.seed(config.seed)
     training_args.seed = config.seed
