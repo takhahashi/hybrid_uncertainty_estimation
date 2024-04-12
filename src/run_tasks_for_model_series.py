@@ -52,6 +52,8 @@ def run_glue_for_model_series_fast(config, work_dir):
                 model_path = Path(model_path) / "models"
         else:
             model_path = config.model_series_dir
+        if not os.path.isdir(model_path):
+            continue
         model_args_str = config.args
         model_args_str += " "
         model_args_str += f"model.model_name_or_path={model_path}"
@@ -88,7 +90,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             "config_path": config.config_path,
             "environ": "",
             "command": config.script,
-            "name": f"model_{model_dir_name}_{seed}"
+            "name": f"model_{model_dir_name}"
             if "fairlib" not in str(config.model_series_dir)
             else f"model_fairlib_{seed}",
             "args": args_str,
