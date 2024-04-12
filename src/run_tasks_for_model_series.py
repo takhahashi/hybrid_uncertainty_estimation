@@ -69,8 +69,6 @@ def run_glue_for_model_series_fast(config, work_dir):
 
         args_str = model_args_str
         args_str += " "
-        args_str += f"seed={seed}"
-        args_str += " "
         if "fairlib" in str(config.model_series_dir) and "ensemble" not in str(
             config.model_series_dir
         ):
@@ -87,6 +85,9 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.prompt_id={config.model_series_dir[-1]}"
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
+        else:
+            args_str += " "
+            args_str += f"seed={seed}"
 
         task = {
             "config_path": config.config_path,
