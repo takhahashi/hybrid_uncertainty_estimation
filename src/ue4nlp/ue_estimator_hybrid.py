@@ -121,7 +121,7 @@ class UeEstimatorHybrid:
         self.model = copy.deepcopy(self.cls._auto_model)
 
         log.info("****************Start fitting epistmic UE**************")
-        self._fit_hp(hue_version=hue_version)
+        self._fit_hp(hue_version=1)
 
         self.epistemic_ue_estimator = create_ue_estimator(
             self.cls,
