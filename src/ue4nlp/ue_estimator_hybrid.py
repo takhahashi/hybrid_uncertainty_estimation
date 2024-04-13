@@ -305,7 +305,6 @@ class UeEstimatorHybrid:
             end_1 = time.time()
 
             eval_results[f"hue_uncertainty_{hue_version}"] = hue.tolist()
-        pdb.set_trace()
 
         sum_inf_time = epistemic_time + (end_1 - start)
         eval_results["ue_time"] = sum_inf_time
