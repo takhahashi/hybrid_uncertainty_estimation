@@ -180,6 +180,16 @@ class UeEstimatorHybrid:
                 seeds = os.listdir(
                     f"{self.ue_args.val_path}/{self.config.data.task_name}_miscl/0.2/{method}/results"
                 )
+            elif self.config.data.task_name in ["asap", "riken"]:
+                lst_dir = os.listdir(
+                    f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results"
+                )
+                seeds = []
+                for file_name in lst_dir:
+                    model_path = Path(f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results") / file_name
+                    if not os.path.isdir(model_path):
+                        continue
+                    seeds.append(file_name)
             else:
                 seeds = os.listdir(
                     f"{self.ue_args.val_path}/{self.config.data.task_name}/0.2/{method}/results"
