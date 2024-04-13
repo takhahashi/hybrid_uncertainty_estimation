@@ -121,6 +121,7 @@ class UeEstimatorHybrid:
         self.model = copy.deepcopy(self.cls._auto_model)
 
         log.info("****************Start fitting epistmic UE**************")
+        self._fit_hp(hue_version=hue_version)
 
         self.epistemic_ue_estimator = create_ue_estimator(
             self.cls,
@@ -136,8 +137,8 @@ class UeEstimatorHybrid:
 
         self.epistemic_ue_estimator.fit_ue(X)
         self.params = {}
-        for hue_version in [1]:
-            self.params[hue_version] = self._fit_hp(hue_version=hue_version)
+        #for hue_version in [1]:
+        #    self.params[hue_version] = self._fit_hp(hue_version=hue_version) ######
 
         log.info("**************Done.**********************")
 
@@ -182,14 +183,13 @@ class UeEstimatorHybrid:
                     f"{self.ue_args.val_path}/{self.config.data.task_name}_miscl/0.2/{method}/results"
                 )
             elif self.config.data.task_name in ["asap", "riken"]:
-                print(f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results")
                 lst_dir = os.listdir(
-                    f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results"
+                    f"{self.ue_args.val_path}/{self.config.data.task_name}/prompt_id_{self.config.data.prompt_id}/{method}/results"
                 )
                 seeds = []
                 print(lst_dir, ' type:',type(lst_dir))
                 for file_name in lst_dir:
-                    model_path = Path(f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results") / file_name
+                    model_path = Path(f"{self.ue_args.val_path}/{self.config.data.task_name}/prompt_id_{self.config.data.prompt_id}/{method}/results") / file_name
                     if not os.path.isdir(model_path):
                         continue
                     seeds.append(file_name)
