@@ -185,6 +185,7 @@ class UeEstimatorHybrid:
                     f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results"
                 )
                 seeds = []
+                print(lst_dir, ' type:',type(lst_dir))
                 for file_name in lst_dir:
                     model_path = Path(f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results") / file_name
                     if not os.path.isdir(model_path):
