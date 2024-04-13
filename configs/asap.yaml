@@ -25,7 +25,7 @@ data:
 spectralnorm_layer: 'last'
 cache_dir: '../workdir/cache/'
 output_dir: '../workdir/results/'
-seed: 42
+seed: fold_${data.fold}
 suffix: ''
 do_train: True
 do_eval: True
