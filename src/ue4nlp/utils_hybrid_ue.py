@@ -166,7 +166,7 @@ def fit_method_hp(
 
 
 def fit_hybrid_hp_validation(
-    dataset,
+    config_data,
     hue_version=1,
     t_min_min=0.0,
     t_min_max=0.15,
@@ -189,10 +189,12 @@ def fit_hybrid_hp_validation(
 
     for seed in seeds:
         if aleatoric_method in ["entropy", "sr"]:
-            if dataset in ["bios", "trustpilot"]:
-                seed_path_val = f"{path_val}/{dataset}_miscl/0.2/{method}/results/{seed}/dev_inference.json"
+            if config_data.task_name in ["bios", "trustpilot"]:
+                seed_path_val = f"{path_val}/{config_data.task_name}_miscl/0.2/{method}/results/{seed}/dev_inference.json"
+            elif config_data.task_name in ["asap", "riken"]:
+                seed_path_val = f"{path_val}/{config_data}/{config_data.prompt_id}/{method}/results/{seed}/dev_inference.json"
             else:
-                seed_path_val = f"{path_val}/{dataset}/0.2/{method}/results/{seed}/dev_inference.json"
+                seed_path_val = f"{path_val}/{config_data}/0.2/{method}/results/{seed}/dev_inference.json"
             _, _, _, sr_val, entropy_val, _ = read_data(seed_path_val, key, ue_func)
             if aleatoric_method == "entropy":
                 aleatoric = entropy_val
@@ -200,10 +202,10 @@ def fit_hybrid_hp_validation(
                 aleatoric = sr_val
         else:
             seed_path_df_val = (
-                f"{path_val}/{dataset}/0.2/deep_fool/results/{seed}/dev_inference.json"
+                f"{path_val}/{config_data}/0.2/deep_fool/results/{seed}/dev_inference.json"
             )
             seed_path_val = (
-                f"{path_val}/{dataset}/0.2/{method}/results/{seed}/dev_inference.json"
+                f"{path_val}/{config_data}/0.2/{method}/results/{seed}/dev_inference.json"
             )
 
             _, _, _, sr_val, entropy_val, deep_fool_val = read_data(

@@ -185,7 +185,7 @@ class UeEstimatorHybrid:
                     f"{self.ue_args.val_path}/{self.config.data.task_name}/0.2/{method}/results"
                 )
             params = fit_hybrid_hp_validation(
-                self.config.data.task_name,
+                self.config.data,
                 hue_version=hue_version,
                 aleatoric_method=self.ue_args.aleatoric,
                 t_min_min=self.ue_args[f"v{hue_version}"].t_min_min,
