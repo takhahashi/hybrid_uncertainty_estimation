@@ -182,6 +182,7 @@ class UeEstimatorHybrid:
                     f"{self.ue_args.val_path}/{self.config.data.task_name}_miscl/0.2/{method}/results"
                 )
             elif self.config.data.task_name in ["asap", "riken"]:
+                print(f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results")
                 lst_dir = os.listdir(
                     f"{self.ue_args.val_path}/{self.config.data.task_name}/{self.config.data.prompt_id}/{method}/results"
                 )
