@@ -446,7 +446,7 @@ class SelectiveTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.pop("labels")
-        output_hidden_states = True if self.reg_type == "metric" else False
+        output_hidden_states = True if self.reg_type == "metric" or self.reg_type == "u_aware_metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
 
         if self.reg_type == "selectivenet":
