@@ -33,6 +33,7 @@ if is_sagemaker_mp_enabled():
         smp_nested_concat,
     )
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+import pdb
 
 
 def entropy(x):
@@ -168,7 +169,7 @@ def multiclass_metric_loss_fast(
 
 
 def multiclass_metric_loss_fast_optimized(
-    represent, target, margin=10, class_num=2, start_idx=1, per_class_norm=False
+    represent, target, margin=10, class_num=2, start_idx=1, per_class_norm=False, probabilities=None,
 ):
     target_list = target.data.tolist()
     dim = represent.data.shape[1]
@@ -226,6 +227,7 @@ def multiclass_metric_loss_fast_optimized(
         loss_intra = loss_intra / num_intra
     if num_inter > 0 and not (per_class_norm):
         loss_inter = loss_inter / num_inter
+    pdb.set_trace()
 
     return loss_intra, loss_inter
 
