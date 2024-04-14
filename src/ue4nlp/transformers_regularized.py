@@ -478,8 +478,7 @@ class SelectiveTrainer(Trainer):
                 torch.cuda.empty_cache()
                 outputs = logits
             softmax_probabilities = F.softmax(outputs, dim=-1)
-            probabilities = torch.max(softmax_probabilities, dim=-1)
-            pdb.set_trace()
+            probabilities = torch.max(softmax_probabilities, dim=-1).values
         if model.config.num_labels == 1:
             #  We are doing regression
             loss_fct = MSELoss()
