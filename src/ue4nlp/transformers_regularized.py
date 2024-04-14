@@ -184,15 +184,25 @@ def multiclass_metric_loss_fast_optimized(
     num_inter = 0
 
     cls_repr = {}
+    cls_p = {}
     for i in range(class_num):
         indices_i = indices[i]
         curr_repr = represent[indices_i]
+        if probabilities != None:
+            curr_p = probabilities[indices_i]
         if len(curr_repr) > 0:
             cls_repr[i] = curr_repr
             s_k = len(indices_i)
-            triangle_matrix = torch.triu(
-                (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
-            )
+            if probabilities != None:
+                cls_p[i] = curr_p
+                p_matrix = curr_p.unsqueeze(1) * curr_p
+                triangle_matrix = torch.triu(
+                    p_matrix * (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
+                )
+            else:
+                triangle_matrix = torch.triu(
+                    (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
+                )
             if per_class_norm:
                 loss_intra += (
                     torch.sum(1 / dim * (triangle_matrix**2))
@@ -207,12 +217,18 @@ def multiclass_metric_loss_fast_optimized(
     bs = represent.shape[0]
     for n, j in enumerate(batch_labels):
         curr_repr = cls_repr[j]
+        if probabilities != None:
+            curr_p = cls_p[j]
         s_k = len(indices[j])
         matrices = torch.zeros(len(batch_labels), bs)
         inter_buf_loss = 0
         for l, k in enumerate(batch_labels[n + 1 :]):
             s_q = len(indices[k])
-            matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
+            if probabilities != None:
+                p_matrix = curr_p.unsqueeze(1) * cls_p[k]
+                matrix = (p_matrix * (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
+            else:
+                matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
             if per_class_norm:
                 loss_inter += torch.sum(
                     torch.clamp(margin - 1 / dim * (matrix**2), min=0)
@@ -227,7 +243,6 @@ def multiclass_metric_loss_fast_optimized(
         loss_intra = loss_intra / num_intra
     if num_inter > 0 and not (per_class_norm):
         loss_inter = loss_inter / num_inter
-    pdb.set_trace()
 
     return loss_intra, loss_inter
 
@@ -259,7 +274,7 @@ def compute_loss_cer(logits, labels, loss, lamb, unpad=False):
 
 
 def compute_loss_metric(
-    hiddens, labels, loss, num_labels, margin, lamb_intra, lamb, unpad=False
+    hiddens, labels, loss, num_labels, margin, lamb_intra, lamb, unpad=False, probabilities=None,
 ):
     """Computes regularization term for loss with Metric loss"""
     if unpad:
@@ -278,6 +293,7 @@ def compute_loss_metric(
         margin=margin,
         class_num=class_num,
         start_idx=start_idx,
+        probabilities=probabilities,
     )
     loss_metric = lamb_intra * loss_intra[0] + lamb * loss_inter[0]
     loss += loss_metric
@@ -431,6 +447,7 @@ class SelectiveTrainer(Trainer):
         labels = inputs.pop("labels")
         output_hidden_states = True if self.reg_type == "metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
+        pdb.set_trace()
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
             selective = outputs.logits[
@@ -471,6 +488,7 @@ class SelectiveTrainer(Trainer):
                 self.lamb_intra,
                 self.lamb,
                 unpad=self.unpad,
+                probabilities=probabilities,
             )
             if self.task == "ner":
                 # we don't need hiddens anymore
