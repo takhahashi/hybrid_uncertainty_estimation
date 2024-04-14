@@ -626,6 +626,9 @@ def fix_config(config):
 
     if config.ue.reg_type == "metric":
         config.ue.use_cache = False
+    
+    if config.ue.reg_type == "u_aware_metric":
+        config.ue.use_cache = False
 
 
 @hydra.main(
