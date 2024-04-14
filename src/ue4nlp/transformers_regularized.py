@@ -466,6 +466,18 @@ class SelectiveTrainer(Trainer):
                 del outputs
                 torch.cuda.empty_cache()
                 outputs = logits
+        if self.reg_type == "u_aware_metric":
+            hiddens = (
+                outputs.hidden_states[-1][:, 0, :]
+                if self.task == "cls"
+                else outputs[1][-1]
+            )
+            if self.task == "cls":
+                del outputs
+                torch.cuda.empty_cache()
+                outputs = logits
+            softmax_probabilities = F.softmax(outputs, dim=-1)
+            probabilities = torch.max(softmax_probabilities, dim=-1)
         if model.config.num_labels == 1:
             #  We are doing regression
             loss_fct = MSELoss()
@@ -479,6 +491,20 @@ class SelectiveTrainer(Trainer):
         elif self.reg_type == "reg-curr":
             loss = compute_loss_cer(logits, labels, loss, self.lamb, unpad=self.unpad)
         elif self.reg_type == "metric":
+            loss = compute_loss_metric(
+                hiddens,
+                labels,
+                loss,
+                model.config.num_labels,
+                self.margin,
+                self.lamb_intra,
+                self.lamb,
+                unpad=self.unpad,
+            )
+            if self.task == "ner":
+                # we don't need hiddens anymore
+                outputs = outputs[0]
+        elif self.reg_type == 'u_aware_metric':
             loss = compute_loss_metric(
                 hiddens,
                 labels,
