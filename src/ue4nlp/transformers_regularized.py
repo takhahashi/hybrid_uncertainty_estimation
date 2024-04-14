@@ -448,7 +448,7 @@ class SelectiveTrainer(Trainer):
         labels = inputs.pop("labels")
         output_hidden_states = True if self.reg_type == "metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
-        pdb.set_trace()
+
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
             selective = outputs.logits[
@@ -479,6 +479,7 @@ class SelectiveTrainer(Trainer):
                 outputs = logits
             softmax_probabilities = F.softmax(outputs, dim=-1)
             probabilities = torch.max(softmax_probabilities, dim=-1)
+            pdb.set_trace()
         if model.config.num_labels == 1:
             #  We are doing regression
             loss_fct = MSELoss()
