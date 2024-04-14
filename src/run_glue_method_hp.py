@@ -455,8 +455,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         training_args.weight_decay_rate = training_args.weight_decay
 
     data_collator = simple_collate_fn
-
     training_args = update_config(training_args, {'fp16':True})
+    
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
     
