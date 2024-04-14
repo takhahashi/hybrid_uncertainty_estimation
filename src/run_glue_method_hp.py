@@ -453,14 +453,10 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         training_args.logging_steps = training_args.warmup_steps
         """
         training_args.weight_decay_rate = training_args.weight_decay
-    collator = ("collator" in config.data.keys()) and bool(config.data.collator)
-    if collator:
-        data_collator = simple_collate_fn
-    else:
-        data_collator = None
-    amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
-    if amp:
-        training_args = update_config(training_args, {'fp16':True})
+
+    data_collator = simple_collate_fn
+
+    training_args = update_config(training_args, {'fp16':True})
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
     

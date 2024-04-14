@@ -534,14 +534,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         """
         training_args.weight_decay_rate = training_args.weight_decay
 
-    collator = ("collator" in config.data.keys()) and bool(config.data.collator)
-    if collator:
-        data_collator = simple_collate_fn
-    else:
-        data_collator = None
-    amp = ("mix_precision" in config.training.keys() and bool(config.training.mix_precision))
-    if amp:
-        training_args = update_config(training_args, {'fp16':True})
+    data_collator = simple_collate_fn
+    training_args = update_config(training_args, {'fp16':True})
 
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
