@@ -243,7 +243,7 @@ def multiclass_metric_loss_fast_optimized(
         loss_intra = loss_intra / num_intra
     if num_inter > 0 and not (per_class_norm):
         loss_inter = loss_inter / num_inter
-    pdb.set_trace()
+
 
     return loss_intra, loss_inter
 
