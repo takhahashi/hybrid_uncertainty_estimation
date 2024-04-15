@@ -1797,16 +1797,15 @@ def simple_collate_fn(list_of_data):
         in_ids.append(torch.tensor(data['input_ids'][:pad_max_len]))
         token_type.append(torch.tensor(data['token_type_ids'][:pad_max_len]))
         atten_mask.append(torch.tensor(data['attention_mask'][:pad_max_len]))
-        try:
+        if 'label' in data.keys():
             labels.append(torch.tensor(data['label']))
-        except:
-            print(data)
     batched_tensor = {}
     batched_tensor['input_ids'] = torch.stack(in_ids)
     batched_tensor['token_type_ids'] = torch.stack(token_type)
     batched_tensor['attention_mask'] = torch.stack(atten_mask)
-    if labels[0].shape  != torch.tensor(1).shape:
-        batched_tensor['labels'] = torch.stack(labels)
-    else:
-        batched_tensor['labels'] = torch.tensor(labels)
+    if len(labels) != 0:
+        if labels[0].shape  != torch.tensor(1).shape:
+            batched_tensor['labels'] = torch.stack(labels)
+        else:
+            batched_tensor['labels'] = torch.tensor(labels)
     return batched_tensor
