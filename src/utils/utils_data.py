@@ -1788,13 +1788,13 @@ def load_jigsaw_race(config):
     return datasets
 
 def simple_collate_fn(list_of_data):
-    print(data)
     pad_max_len = torch.tensor(0)
     for data in list_of_data:
         if(torch.count_nonzero(torch.tensor(data['attention_mask'])) > pad_max_len):
             pad_max_len = torch.count_nonzero(torch.tensor(data['attention_mask']))
     in_ids, token_type, atten_mask, labels = [], [], [], []
     for data in list_of_data:
+        print(data)
         in_ids.append(torch.tensor(data['input_ids'][:pad_max_len]))
         token_type.append(torch.tensor(data['token_type_ids'][:pad_max_len]))
         atten_mask.append(torch.tensor(data['attention_mask'][:pad_max_len]))
