@@ -440,7 +440,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     is_regression = False
     metric_fn = lambda p: compute_metrics(is_regression, metric, p)
 
-    training_args.save_steps = 0
     if config.do_train:
         """
         training_args.warmup_steps = int(
