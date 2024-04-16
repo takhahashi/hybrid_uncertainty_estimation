@@ -464,7 +464,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     training_args = update_config(training_args, {'save_strategy':'epoch'})
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
-        training_args = update_config(training_args, {'metric_for_best_model':'loss'})
+        #training_args = update_config(training_args, {'metric_for_best_model':'loss'})
         callbacks = [earlystopping]
     else:
         callbacks = None
