@@ -459,7 +459,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
     
-    training_args = update_config(training_args, {'strategy':'epoch'})
     training_args = update_config(training_args, {'load_best_model_at_end':True})
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
     if "patience" in config.training.keys():
