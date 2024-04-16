@@ -459,20 +459,18 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     use_sngp = ue_args.ue_type == "sngp"
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
     
-    #training_args = update_config(training_args, {'load_best_model_at_end':True})
+    training_args = update_config(training_args, {'save_steps':None})
+    training_args = update_config(training_args, {'load_best_model_at_end':True})
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
     training_args = update_config(training_args, {'save_strategy':'epoch'})
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
-        #training_args = update_config(training_args, {'metric_for_best_model':'loss'})
+        training_args = update_config(training_args, {'metric_for_best_model':'loss'})
         callbacks = [earlystopping]
     else:
         callbacks = None
 
     #################### Training ##########################
-    print('----------------------------------------------------------------')
-    print(training_args)
-    print('----------------------------------------------------------------')
     trainer = get_trainer(
         "cls",
         use_selective,
