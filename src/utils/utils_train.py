@@ -43,6 +43,7 @@ def get_trainer(
                 train_dataset=train_dataset,
                 eval_dataset=eval_dataset,
                 compute_metrics=metric_fn,
+                callbacks=callbacks,
             )
         else:
             trainer = SNGPTrainer(
@@ -52,6 +53,7 @@ def get_trainer(
                 eval_dataset=eval_dataset,
                 compute_metrics=metric_fn,
                 data_collator=data_collator,
+                callbacks=callbacks,
             )
     elif use_selective:
         trainer = SelectiveTrainer(
@@ -60,6 +62,7 @@ def get_trainer(
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
             compute_metrics=metric_fn,
+            callbacks=callbacks,
         )
     return trainer
 
