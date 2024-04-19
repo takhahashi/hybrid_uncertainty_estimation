@@ -101,7 +101,6 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     }
     for key, value in models_constructors.items():
         if key in model_path_or_name:
-            pdb.set_trace()
             return (
                 models_constructors[key](
                     model_config,
