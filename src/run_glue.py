@@ -230,7 +230,6 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
-        print(res[2:])
         preds, probs = res[:2]
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
