@@ -246,9 +246,6 @@ def do_predict_eval(
 
 
 def train_eval_glue_model(config, training_args, data_args, work_dir):
-    print('------------------------------------------------')
-    print(config)
-    print('------------------------------------------------')
     ue_args = config.ue
     model_args = config.model
 
