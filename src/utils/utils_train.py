@@ -62,6 +62,7 @@ def get_trainer(
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
             compute_metrics=metric_fn,
+            data_collator=data_collator,
             callbacks=callbacks,
         )
     return trainer
