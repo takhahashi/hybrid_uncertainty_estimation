@@ -25,7 +25,7 @@ from transformers.modeling_outputs import (
     SequenceClassifierOutput,
     BaseModelOutputWithPoolingAndCrossAttentions,
 )
-
+import pdb
 
 class BertForTokenClassificationCached(BertForTokenClassification):
     def __init__(self, config):
@@ -726,6 +726,8 @@ class DistilBertCachedInferenceMixin:
                 output_hidden_states=output_hidden_states,
                 return_dict=return_dict,
             )
+            for n, o in hidden_states.__dict__.items():
+                pdb.set_trace()
 
             if self.use_cache and (
                 self.cache_size is None or len(self.cache) < self.cache_size
