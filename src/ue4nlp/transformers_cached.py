@@ -322,8 +322,6 @@ class CachedInferenceMixin:
         return_dict,
     ):
         cache_key = self.create_cache_key(input_ids)
-        print("--------------------------input_ids-----------------------------")
-        print(input_ids)
 
         if not self.use_cache or cache_key not in self.cache:
             if head_mask is not None:
