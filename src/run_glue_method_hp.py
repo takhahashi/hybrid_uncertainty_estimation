@@ -483,7 +483,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         eval_dataset,
         metric_fn,
         data_collator = data_collator,
-        callbacks=callbacks,
+    
     )
     if config.do_train:
         trainer.train(
