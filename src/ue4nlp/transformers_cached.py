@@ -366,6 +366,11 @@ class CachedInferenceMixin:
                     for n, o in self.cache[cache_key].items()
                 }
             )
+            print("----------------------------------------------------------------")
+            print("usig_cache!!!")
+            print("--------------------------input_ids-----------------------------")
+            print(input_ids)
+            print("----------------------------------------------------------------")
 
         return hidden_states
 
