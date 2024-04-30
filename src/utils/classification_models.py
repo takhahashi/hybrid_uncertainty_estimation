@@ -31,6 +31,7 @@ from transformers import (
     DebertaForSequenceClassification,
     RobertaForSequenceClassification,
     DistilBertForSequenceClassification,
+    BertModel,
 )
 
 from torch.nn.utils import spectral_norm
@@ -178,6 +179,11 @@ def create_bert(
                 )
                 model.load_state_dict(torch.load(config.model.model_path))
             """ 
+        elif model_config.hybrid:
+            model = build_model(
+                HybridBert, model_path_or_name, **model_kwargs
+            )
+
         else:
             model = build_model(
                 AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
@@ -777,3 +783,81 @@ def create_xlnet(
             AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
         )
     return model
+
+
+@dataclass
+class HybridOutput(SequenceClassifierOutput):
+    loss: Optional[torch.FloatTensor] = None
+    reg_output: torch.FloatTensor = None
+    logits: torch.FloatTensor = None
+    hidden_states: Optional[Tuple[torch.FloatTensor, ...]] = None
+    attentions: Optional[Tuple[torch.FloatTensor, ...]] = None
+
+
+class HybridBert(BertForSequenceClassification):
+    def __init__(self, config):
+        super(HybridBert, self).__init__(config)
+        self.regressor = nn.Linear(config.hidden_size, 1)
+        self.sigmoid = nn.Sigmoid()
+
+        nn.init.normal_(self.regressor.weight, std=0.02)  # 重みの初期化
+        nn.init.normal_(self.regressor.bias, 0)
+    
+    def forward(
+        self,
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
+    ):
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
+
+        outputs = self.inference_body(
+            body=self.bert,
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+
+        pooled_output = outputs[1]
+
+        pooled_output = self.dropout(pooled_output)
+        logits = self.classifier(pooled_output)
+
+        regressor_output = self.regressor(pooled_output)
+
+        loss = None
+        if labels is not None:
+            if self.num_labels == 1:
+                #  We are doing regression
+                loss_fct = MSELoss()
+                loss = loss_fct(logits.view(-1), labels.view(-1))
+            else:
+                loss_fct = CrossEntropyLoss()
+                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+
+        if not return_dict:
+            output = (logits,) + outputs[2:]
+            return ((loss,) + output) if loss is not None else output
+
+        return HybridOutput(
+            loss=loss,
+            logits=logits,
+            reg_output=regressor_output,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+        )
