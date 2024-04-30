@@ -33,13 +33,24 @@ from transformers import (
     DistilBertForSequenceClassification,
     BertModel,
 )
+from transformers.modeling_outputs import (
+    SequenceClassifierOutput,
+    BaseModelOutputWithPoolingAndCrossAttentions,
+)
+import torch.nn as nn
+from torch.nn import (
+    CrossEntropyLoss,
+    BCEWithLogitsLoss,
+    MSELoss,
+)
+from dataclasses import dataclass
 
 from torch.nn.utils import spectral_norm
 import torch
 import logging
 import os
 from pathlib import Path
-
+from typing import Optional, Tuple
 from safetensors.torch import load_file
 
 log = logging.getLogger(__name__)
