@@ -41,13 +41,9 @@ def init_wandb(directory, config):
     run_name = f"{run_name}"
     print('config:',config)
     print()
+    project_name = f'{config.model.model_name_or_path}' + f'{config.ue.reg_type}' + f'prompt_id_{config.data.prompt_id}' + f'{config.data}'
+    run_name = f'fold_{config.data.fold}'
     return wandb.init(
-        #group=group_name,
-        #name=run_name,
-        #config=config,
-        ## mode="offline",
-        #job_type="train",
-        #force=True,
-        #tags=[strat_name, model_name, task],
-        #mode="offline",
+        project = project_name,
+        name=run_name,
     )
