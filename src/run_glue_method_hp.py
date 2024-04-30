@@ -471,7 +471,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         callbacks = [earlystopping]
     else:
         callbacks = None
-    print(training_args)
     #################### Training ##########################
     trainer = get_trainer(
         "cls",
