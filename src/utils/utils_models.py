@@ -17,6 +17,7 @@ from utils.classification_models import (
     create_fairlib_bert,
     create_fairlib_mlp,
     build_model,
+    create_hybridbert,
 )
 import pdb
 import logging
@@ -98,6 +99,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         "distilbert": create_distilbert,
         "xlnet": create_xlnet,
         "bert": create_bert,
+        "hybridbert": create_hybridbert,
     }
     for key, value in models_constructors.items():
         if key in model_path_or_name:

@@ -796,6 +796,29 @@ def create_xlnet(
         )
     return model
 
+def create_hybridbert(
+    model_config,
+    tokenizer,
+    use_sngp,
+    use_duq,
+    use_spectralnorm,
+    use_mixup,
+    use_selective,
+    ue_args,
+    model_path_or_name,
+    config,
+):
+    model_kwargs = dict(
+        from_tf=False,
+        config=model_config,
+        cache_dir=config.cache_dir,
+    )
+    if 'hybridbert' == model_path_or_name:
+        model_path_or_name = 'bert-base-uncased'
+    model = build_model(
+        HybridBert, model_path_or_name, **model_kwargs
+    )
+    return model
 
 @dataclass
 class HybridOutput(SequenceClassifierOutput):
@@ -861,7 +884,7 @@ class HybridBert(BertForSequenceClassification):
             ########regression loss########
             reg_labels = labels.view(-1) / (self.num_labels - 1)
             loss_fct = MSELoss()
-            r_loss = loss_fct(regressor_output.view(-1), reg_labels.view(-1))
+            r_loss = loss_fct(regressor_output.view(-1), reg_labels)
             
             loss, s_wei, diff_wei, alpha, pre_loss = self.lsb(regression=r_loss, classification=c_loss)
 
