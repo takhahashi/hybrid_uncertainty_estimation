@@ -851,22 +851,11 @@ class HybridBert(BertForSequenceClassification):
 
         regressor_output = self.regressor(pooled_output)
 
-        loss = None
-        if labels is not None:
-            if self.num_labels == 1:
-                #  We are doing regression
-                loss_fct = MSELoss()
-                loss = loss_fct(logits.view(-1), labels.view(-1))
-            else:
-                loss_fct = CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
-
         if not return_dict:
             output = (logits,) + outputs[2:]
             return ((loss,) + output) if loss is not None else output
 
         return HybridOutput(
-            loss=loss,
             logits=logits,
             reg_output=regressor_output,
             hidden_states=outputs.hidden_states,
