@@ -493,9 +493,9 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         # Rewrite the optimal hyperparam data if we want the evaluation metrics of the final trainer
         if config.do_eval:
             evaluation_metrics = trainer.evaluate()
-        if work_dir != None:
-            trainer.save_model(work_dir)
-            tokenizer.save_pretrained(work_dir)
+        #if work_dir != None:
+        #    trainer.save_model(work_dir)
+        #    tokenizer.save_pretrained(work_dir)
 
     #################### Predicting##########################
 
