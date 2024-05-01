@@ -463,11 +463,10 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     training_args = update_config(training_args, {'save_steps':None})
     training_args = update_config(training_args, {'load_best_model_at_end':True})
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
-    training_args = update_config(training_args, {'save_strategy':'epoch'})
-    training_args = update_config(training_args, {'metric_for_best_model':'loss'})
+    #training_args = update_config(training_args, {'save_strategy':'epoch'})
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
-        
+        training_args = update_config(training_args, {'metric_for_best_model':'loss'})
         callbacks = [earlystopping]
     else:
         callbacks = None
@@ -493,9 +492,9 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         # Rewrite the optimal hyperparam data if we want the evaluation metrics of the final trainer
         if config.do_eval:
             evaluation_metrics = trainer.evaluate()
-        #if work_dir != None:
-        #    trainer.save_model(work_dir)
-        #    tokenizer.save_pretrained(work_dir)
+        if work_dir != None:
+            trainer.save_model(work_dir)
+            tokenizer.save_pretrained(work_dir)
 
     #################### Predicting##########################
 
