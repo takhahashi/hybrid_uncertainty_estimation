@@ -4,7 +4,7 @@ from typing import Optional
 import torch
 
 from transformers.file_utils import add_start_docstrings
-from transformers import Trainer
+from transformers import Trainer, TrainerCallback
 from ue4nlp.transformers_regularized import (
     SelectiveTrainer,
 )
@@ -139,3 +139,12 @@ class TrainingArgsWithMSDCoefs(TrainingArguments):
     lam2: Optional[float] = field(
         default=0.01, metadata={"help": "lambda_2 value for regularization."}
     )
+
+
+class HybridModelCallback(TrainerCallback):
+    def __init__(self, hb_model):
+        super().__init__()
+        self.hb_model = hb_model
+    
+    def on_epoch_end(self, args, state, control, **kwargs):
+        self.hb_model.lsb.update()
