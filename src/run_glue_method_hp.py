@@ -437,9 +437,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         metric = load_metric(
             "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
         )
-    test_dataset = (
-        datasets["test"] if config.do_eval or config.do_ue_estimate else None
-    )
+    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+        eval_dataset = datasets["validation"]
+        test_dataset = (
+            datasets["test"] if config.do_eval or config.do_ue_estimate else None
+        )
     is_regression = False
     metric_fn = lambda p: compute_metrics(is_regression, metric, p)
 
