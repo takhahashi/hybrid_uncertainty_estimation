@@ -101,6 +101,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     model_path_or_name = model_args.model_name_or_path
 
     models_constructors = {
+        "hybridbert": create_hybridbert,
         "fairlib_bert": create_fairlib_bert,
         "fairlib_mlp": create_fairlib_mlp,
         "fairlib_fixed": create_fairlib_mlp,
@@ -111,7 +112,6 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         "distilbert": create_distilbert,
         "xlnet": create_xlnet,
         "bert": create_bert,
-        "hybridbert": create_hybridbert,
     }
     for key, value in models_constructors.items():
         if key in model_path_or_name:

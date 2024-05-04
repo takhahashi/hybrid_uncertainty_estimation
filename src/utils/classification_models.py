@@ -814,7 +814,7 @@ def create_hybridbert(
         cache_dir=config.cache_dir,
     )
     model = build_model(
-        HybridBert, 'bert-base-uncased', **model_kwargs
+        BertForSequenceClassification, 'bert-base-uncased', **model_kwargs
     )
     return model
 
