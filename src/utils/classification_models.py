@@ -833,6 +833,8 @@ class HybridBert(BertForSequenceClassification):
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
         self.lsb = ScaleDiffBalance(task_names=['regression', 'classification'])
+        self.scale_weights = {}
+        self.diff_weights = {}
 
         nn.init.normal_(self.regressor.weight, std=0.02)  # 重みの初期化
         nn.init.normal_(self.regressor.bias, 0)
@@ -884,6 +886,8 @@ class HybridBert(BertForSequenceClassification):
             r_loss = loss_fct(regressor_output.view(-1), reg_labels)
             
             loss, s_wei, diff_wei, alpha, pre_loss = self.lsb(regression=r_loss, classification=c_loss)
+            self.scale_weights = s_wei
+            self.diff_weights = diff_wei
 
         if not return_dict:
             output = (logits,) + outputs[2:]
@@ -921,7 +925,7 @@ class ScaleDiffBalance:
     self.all_loss_log = np.append(self.all_loss_log, self.all_batch_loss/self.batch_count)
     self.all_batch_loss = 0
     for k, v in self.each_task_batch_loss.items():
-       self.loss_log[k] = np.append(self.loss_log[k], v)
+       self.loss_log[k] = np.append(self.loss_log[k], v/self.batch_count)
        self.each_task_batch_loss[k] = 0
     self.batch_count = 0
   
