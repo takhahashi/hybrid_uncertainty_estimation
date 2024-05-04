@@ -813,10 +813,8 @@ def create_hybridbert(
         config=model_config,
         cache_dir=config.cache_dir,
     )
-    if 'hybridbert' == model_path_or_name:
-        model_path_or_name = 'bert-base-uncased'
     model = build_model(
-        HybridBert, model_path_or_name, **model_kwargs
+        HybridBert, 'bert-base-uncased', **model_kwargs
     )
     return model
 
