@@ -151,5 +151,5 @@ class HybridModelCallback(TrainerCallback):
         self.hb_model.lsb.update()
         for k, v in self.hb_model.lsb.loss_log.items():
             scaled_loss = self.hb_model.diff_weights[k].to('cpu').detach().numpy().copy() * self.hb_model.scale_weights[k].to('cpu').detach().numpy().copy() * v[-1]
-            each_task_loss = v[-1].to('cpu').detach().numpy().copy()
+            each_task_loss = v[-1]
             self.trainer.log({f"{k}_scaled_loss": scaled_loss, f"{k}_loss":each_task_loss})
