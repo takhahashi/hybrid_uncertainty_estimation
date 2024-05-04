@@ -854,9 +854,8 @@ class HybridBert(BertForSequenceClassification):
             return_dict if return_dict is not None else self.config.use_return_dict
         )
 
-        outputs = self.inference_body(
-            body=self.bert,
-            input_ids=input_ids,
+        outputs = self.bert(
+            input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
             position_ids=position_ids,
