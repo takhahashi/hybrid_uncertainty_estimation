@@ -931,7 +931,7 @@ class ScaleDiffBalance:
     diff_weights = self._calc_diff_weights()
     alpha = self._calc_alpha(diff_weights)
     all_loss = 0
-    for k, each_loss in kwargs:
+    for k, each_loss in kwargs.items():
        all_loss += scale_weights[k] * diff_weights[k] * each_loss
        self.each_task_batch_loss[k] += each_loss
     if len(self.all_loss_log) < 1:
