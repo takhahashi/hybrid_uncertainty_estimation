@@ -815,8 +815,6 @@ def create_hybridbert(
     )
     if 'hybridbert' == model_path_or_name:
         model_path_or_name = 'bert-base-uncased'
-    hb_bert = HybridBert(**model_kwargs)
-    model = hb_bert.bert.from_pretrained('bert-base-uncased')
     model = build_model(
         HybridBert, model_path_or_name, **model_kwargs
     )

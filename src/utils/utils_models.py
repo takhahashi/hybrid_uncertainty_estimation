@@ -55,12 +55,20 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         if fairlib_args is None
         else fairlib_args.model_name
     )
-    model_config = AutoConfig.from_pretrained(
-        base_model_name,
-        num_labels=num_labels,
-        finetuning_task=data_args.task_name,
-        cache_dir=config.cache_dir,
-    )
+    if 'hybridbert' == base_model_name:
+        model_config = AutoConfig.from_pretrained(
+            'bert-base-uncased',
+            num_labels=num_labels,
+            finetuning_task=data_args.task_name,
+            cache_dir=config.cache_dir,
+        )
+    else:
+        model_config = AutoConfig.from_pretrained(
+            base_model_name,
+            num_labels=num_labels,
+            finetuning_task=data_args.task_name,
+            cache_dir=config.cache_dir,
+        )
 
     if (
         data_args.task_name == "moji_preproc"
