@@ -913,6 +913,7 @@ class ScaleDiffBalance:
     self.loss_log = defaultdict(list)
     self.beta = beta
     self.all_batch_loss = 0
+    self.each_task_batch_loss = {}
     for k in self.task_names:
         self.each_task_batch_loss[k] = 0
     self.batch_count = 0
