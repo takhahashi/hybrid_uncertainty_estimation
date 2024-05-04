@@ -901,7 +901,7 @@ class HybridBert(BertForSequenceClassification):
 class ScaleDiffBalance:
   def __init__(self, task_names, priority=None, beta=1.):
     self.task_names = task_names
-    self.num_tasks = len(self.task_nemes)
+    self.num_tasks = len(self.task_names)
     self.task_priority = {}
     if priority is not None:
         for k, v in priority.items():
