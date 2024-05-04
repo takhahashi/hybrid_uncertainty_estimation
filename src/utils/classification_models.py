@@ -815,6 +815,8 @@ def create_hybridbert(
     )
     if 'hybridbert' == model_path_or_name:
         model_path_or_name = 'bert-base-uncased'
+    hb_bert = HybridBert(**model_kwargs)
+    model = hb_bert.bert.from_pretrained('bert-base-uncased')
     model = build_model(
         HybridBert, model_path_or_name, **model_kwargs
     )
@@ -831,7 +833,7 @@ class HybridOutput(SequenceClassifierOutput):
 
 class HybridBert(BertForSequenceClassification):
     def __init__(self, config):
-        super(HybridBert, self).__init__(config)
+        super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
         self.lsb = ScaleDiffBalance(task_names=['regression', 'classification'])
