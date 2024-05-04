@@ -150,6 +150,6 @@ class HybridModelCallback(TrainerCallback):
     def on_epoch_end(self, args, state, control, **kwargs):
         self.hb_model.lsb.update()
         for k, v in self.hb_model.lsb.loss_log.items():
-            scaled_loss = self.hb_model.diff_weights[k] * self.hb_model.scale_weights[k] * v[-1]
-            each_task_loss = v[-1]
+            scaled_loss = (self.hb_model.diff_weights[k] * self.hb_model.scale_weights[k] * v[-1]).to('cpu').detach().numpy().copy()
+            each_task_loss = v[-1].to('cpu').detach().numpy().copy()
             self.trainer.log({f"{k}_scaled_loss": scaled_loss, f"{k}_loss":each_task_loss})
