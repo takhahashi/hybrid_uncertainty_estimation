@@ -937,12 +937,12 @@ class ScaleDiffBalance:
     all_loss = 0
     for k, each_loss in kwargs.items():
        all_loss += scale_weights[k] * diff_weights[k] * each_loss
-       self.each_task_batch_loss[k] += each_loss
+       self.each_task_batch_loss[k] += each_loss.to('cpu').detach().numpy().copy()
     if len(self.all_loss_log) < 1:
       pre_loss = 0
     else:
       pre_loss = self.all_loss_log[-1]
-    self.all_batch_loss += alpha * all_loss
+    self.all_batch_loss += (alpha * all_loss).to('cpu').detach().numpy().copy()
     return alpha * all_loss, scale_weights, diff_weights, alpha, pre_loss
   
   def _calc_scale_weights(self):
