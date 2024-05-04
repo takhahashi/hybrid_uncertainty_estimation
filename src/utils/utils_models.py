@@ -56,19 +56,17 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         else fairlib_args.model_name
     )
     if 'hybridbert' == base_model_name:
-        model_config = AutoConfig.from_pretrained(
-            'bert-base-uncased',
-            num_labels=num_labels,
-            finetuning_task=data_args.task_name,
-            cache_dir=config.cache_dir,
-        )
+        model_config_name = 'bert-base-uncased'
+    elif 'hybriddeberta' == base_model_name:
+        model_config_name = 'microsoft/debert-v3-base'
     else:
-        model_config = AutoConfig.from_pretrained(
-            base_model_name,
-            num_labels=num_labels,
-            finetuning_task=data_args.task_name,
-            cache_dir=config.cache_dir,
-        )
+        model_config_name = base_model_name
+    model_config = AutoConfig.from_pretrained(
+        model_config_name,
+        num_labels=num_labels,
+        finetuning_task=data_args.task_name,
+        cache_dir=config.cache_dir,
+    )
 
     if (
         data_args.task_name == "moji_preproc"
@@ -84,8 +82,14 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         tokenizer.__call__ = lambda instances, *args: instances
         tokenizer._call_one = lambda text, text_pair, *args, **kwargs: text
     else:
+        if 'hybridbert' == base_model_name:
+            model_tokenizer_name = 'bert-base-uncased'
+        elif 'hybriddeberta' == base_model_name:
+            model_tokenizer_name = 'microsoft/debert-v3-base' 
+        else:
+            model_tokenizer_name = base_model_name
         tokenizer = AutoTokenizer.from_pretrained(
-            base_model_name,
+            model_tokenizer_name,
             cache_dir=config.cache_dir,
         )
 
