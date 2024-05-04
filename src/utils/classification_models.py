@@ -971,6 +971,6 @@ class ScaleDiffBalance:
       return torch.tensor(1.).cuda()
     else:
       tmp = 0
-      for k, _ in self.task_priority.items():
-         tmp += self.task_priority[k].cuda() * diff_weights[k]
+      for k, v in self.task_priority.items():
+         tmp += torch.tensor(v).cuda() * diff_weights[k]
       return (1/tmp).cuda()
