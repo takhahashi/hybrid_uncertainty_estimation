@@ -33,7 +33,7 @@ if is_sagemaker_mp_enabled():
         smp_nested_concat,
     )
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-import pdb
+from utils.classification_models import HybridOutput
 
 
 def entropy(x):
@@ -448,7 +448,7 @@ class SelectiveTrainer(Trainer):
         labels = inputs.pop("labels")
         output_hidden_states = True if self.reg_type == "metric" or self.reg_type == "u_aware_metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
-
+        hybridbert = isinstance(outputs, HybridOutput)
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
             selective = outputs.logits[
@@ -457,55 +457,44 @@ class SelectiveTrainer(Trainer):
             cls_logits = outputs.logits[:, -model.config.num_labels :]
         else:
             logits = outputs.logits if self.task == "cls" else outputs[0]
-        if self.reg_type == "metric":
+        if self.reg_type == "metric" or self.reg_type == "u_aware_metric":
+            probabilities = None
             hiddens = (
                 outputs.hidden_states[-1][:, 0, :]
                 if self.task == "cls"
                 else outputs[1][-1]
             )
             if self.task == "cls":
-                del outputs
-                torch.cuda.empty_cache()
-                outputs = logits
-        if self.reg_type == "u_aware_metric":
-            hiddens = (
-                outputs.hidden_states[-1][:, 0, :]
-                if self.task == "cls"
-                else outputs[1][-1]
-            )
-            if self.task == "cls":
-                del outputs
-                torch.cuda.empty_cache()
-                outputs = logits
-            softmax_probabilities = F.softmax(outputs, dim=-1)
-            probabilities = torch.max(softmax_probabilities, dim=-1).values
+                logits_outputs = logits
+            if self.reg_type == "u_aware_metric":
+                softmax_probabilities = F.softmax(logits_outputs, dim=-1)
+                if hybridbert:
+                    reg_output = outputs.reg_output
+                    reg_pred_int = np.round((model.config.num_labels - 1) * reg_output.to('cpu').detach().numpy().copy())
+                    probabilities = softmax_probabilities[len(softmax_probabilities)[0], reg_pred_int]
+                else:
+                    probabilities = torch.max(softmax_probabilities, dim=-1).values
+
         if model.config.num_labels == 1:
             #  We are doing regression
             loss_fct = MSELoss()
             loss = loss_fct(logits.view(-1), labels.view(-1))
         else:
-            loss_fct = CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
+            if hybridbert:
+                loss = outputs.loss
+            else:
+                loss_fct = CrossEntropyLoss()
+                loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
 
+        if self.reg_type == "metric" or self.reg_type == "u_aware_metric":
+            del outputs
+            torch.cuda.empty_cache()
+        
         if self.reg_type == "raw":
             pass
         elif self.reg_type == "reg-curr":
             loss = compute_loss_cer(logits, labels, loss, self.lamb, unpad=self.unpad)
-        elif self.reg_type == "metric":
-            loss = compute_loss_metric(
-                hiddens,
-                labels,
-                loss,
-                model.config.num_labels,
-                self.margin,
-                self.lamb_intra,
-                self.lamb,
-                unpad=self.unpad,
-            )
-            if self.task == "ner":
-                # we don't need hiddens anymore
-                outputs = outputs[0]
-        elif self.reg_type == 'u_aware_metric':
+        elif self.reg_type == "metric" or self.reg_type == "u_aware_metric":
             loss = compute_loss_metric(
                 hiddens,
                 labels,
@@ -554,10 +543,10 @@ class SelectiveTrainer(Trainer):
         if self.reg_type == "selectivenet":
             outputs.selective = selective
 
-        if isinstance(outputs, tuple):
-            return (loss,) + outputs if return_outputs else loss
+        if isinstance(logits_outputs, tuple):
+            return (loss,) + logits_outputs if return_outputs else loss
         else:
-            return (loss, outputs) if return_outputs else loss
+            return (loss, logits_outputs) if return_outputs else loss
 
     def prediction_step(
         self,
