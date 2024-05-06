@@ -449,8 +449,8 @@ class SelectiveTrainer(Trainer):
         output_hidden_states = True if self.reg_type == "metric" or self.reg_type == "u_aware_metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
         hybridbert = isinstance(outputs, HybridOutput)
-        print("===============reg_int=================")
-        print(outputs)
+        print("===============isinstance=================")
+        print(isinstance(outputs, HybridOutput))
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
             selective = outputs.logits[
