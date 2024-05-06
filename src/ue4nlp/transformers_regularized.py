@@ -483,7 +483,7 @@ class SelectiveTrainer(Trainer):
             if hybridbert:
                 loss = outputs.loss
                 print("===============type=================")
-                print(type(loss))
+                print(type(loss), loss)
             else:
                 loss_fct = CrossEntropyLoss()
                 loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
