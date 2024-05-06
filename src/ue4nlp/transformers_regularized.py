@@ -450,7 +450,7 @@ class SelectiveTrainer(Trainer):
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
         hybridbert = isinstance(outputs, HybridOutput)
         print("===============reg_int=================")
-        print(hybridbert)
+        print(outputs)
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
             selective = outputs.logits[
