@@ -872,7 +872,7 @@ class HybridBert(BertForSequenceClassification):
 
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
-        regressor_output = self.regressor(pooled_output)
+        regressor_output = self.sigmoid(self.regressor(pooled_output))
 
         loss = None
         if labels is not None:
