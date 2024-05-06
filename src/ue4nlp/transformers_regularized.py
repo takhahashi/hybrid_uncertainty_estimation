@@ -476,7 +476,7 @@ class SelectiveTrainer(Trainer):
                     print(reg_pred_int)
                     print("===============probs=================")
                     print(softmax_probabilities)
-                    probabilities = softmax_probabilities[len(softmax_probabilities), reg_pred_int]
+                    probabilities = softmax_probabilities[list(range(len(softmax_probabilities))), reg_pred_int]
                     print("===============reg_probs=================")
                     print(probabilities)
                 else:
