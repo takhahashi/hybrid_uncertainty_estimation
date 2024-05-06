@@ -471,7 +471,13 @@ class SelectiveTrainer(Trainer):
                 if hybridbert:
                     reg_output = outputs.reg_output
                     reg_pred_int = np.round((model.config.num_labels - 1) * reg_output.to('cpu').detach().numpy().copy())
+                    print("===============reg_int=================")
+                    print(reg_pred_int)
+                    print("===============probs=================")
+                    print(softmax_probabilities)
                     probabilities = softmax_probabilities[len(softmax_probabilities)[0], reg_pred_int]
+                    print("===============reg_probs=================")
+                    print(probabilities)
                 else:
                     probabilities = torch.max(softmax_probabilities, dim=-1).values
 
@@ -482,8 +488,6 @@ class SelectiveTrainer(Trainer):
         else:
             if hybridbert:
                 loss = outputs.loss
-                print("===============type=================")
-                print(type(loss), loss)
             else:
                 loss_fct = CrossEntropyLoss()
                 loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
