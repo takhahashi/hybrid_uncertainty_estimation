@@ -175,13 +175,12 @@ def multiclass_metric_loss_fast_optimized(
     dim = represent.data.shape[1]
 
     indices = []
-    print("=================target_list==========================")
-    print(target_list)
-    print('=========probs==========')
-    print(probabilities)
-    for class_idx in range(1, class_num + 1):
+
+    for class_idx in range(0, class_num):
         indice_i = [i for i, x in enumerate(target_list) if x == class_idx]
         indices.append(indice_i)
+    print("========indices=======")
+    print(indices)
     loss_intra = torch.FloatTensor([0]).to(represent.device)
     num_intra = 0
     loss_inter = torch.FloatTensor([0]).to(represent.device)
@@ -190,11 +189,16 @@ def multiclass_metric_loss_fast_optimized(
     cls_repr = {}
     cls_p = {}
     for i in range(class_num):
+        print("=====class_label=======")
+        print(i)
         indices_i = indices[i]
         curr_repr = represent[indices_i]
         if probabilities != None:
             curr_p = probabilities[indices_i]
+
         if len(curr_repr) > 0:
+            print("=====curr_p=======")
+            print(curr_p)
             cls_repr[i] = curr_repr
             s_k = len(indices_i)
             if probabilities != None:
@@ -203,6 +207,10 @@ def multiclass_metric_loss_fast_optimized(
                 triangle_matrix = torch.triu(
                     p_matrix * (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
                 )
+                print('===========rpr_matrix===========')
+                print((curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1))
+                print('===========p_matrix==============')
+                print(p_matrix)
             else:
                 triangle_matrix = torch.triu(
                     (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
