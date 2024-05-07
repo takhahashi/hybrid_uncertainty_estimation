@@ -177,6 +177,8 @@ def multiclass_metric_loss_fast_optimized(
     indices = []
     print("=================target_list==========================")
     print(target_list)
+    print('=========probs==========')
+    print(probabilities)
     for class_idx in range(1, class_num + 1):
         indice_i = [i for i, x in enumerate(target_list) if x == class_idx]
         indices.append(indice_i)
@@ -476,6 +478,7 @@ class SelectiveTrainer(Trainer):
                     reg_pred_int = np.round((model.config.num_labels - 1) * reg_output.to('cpu').detach().view(-1).numpy().copy())
                     probabilities = softmax_probabilities[list(range(len(softmax_probabilities))), reg_pred_int]
                     print('=========probs==========')
+                    print(probabilities)
                 else:
                     probabilities = torch.max(softmax_probabilities, dim=-1).values
 
