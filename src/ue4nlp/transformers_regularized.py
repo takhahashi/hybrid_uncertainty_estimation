@@ -478,8 +478,7 @@ class SelectiveTrainer(Trainer):
                     reg_output = outputs.reg_output
                     reg_pred_int = np.round((model.config.num_labels - 1) * reg_output.to('cpu').detach().view(-1).numpy().copy())
                     probabilities = softmax_probabilities[list(range(len(softmax_probabilities))), reg_pred_int]
-                    print('=========probs==========')
-                    print(probabilities)
+
                 else:
                     probabilities = torch.max(softmax_probabilities, dim=-1).values
 
