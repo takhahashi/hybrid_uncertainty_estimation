@@ -189,16 +189,12 @@ def multiclass_metric_loss_fast_optimized(
     cls_repr = {}
     cls_p = {}
     for i in range(class_num):
-        print("=====class_label=======")
-        print(i)
         indices_i = indices[i]
         curr_repr = represent[indices_i]
         if probabilities != None:
             curr_p = probabilities[indices_i]
 
         if len(curr_repr) > 0:
-            print("=====curr_p=======")
-            print(curr_p)
             cls_repr[i] = curr_repr
             s_k = len(indices_i)
             if probabilities != None:
@@ -207,12 +203,6 @@ def multiclass_metric_loss_fast_optimized(
                 triangle_matrix = torch.triu(
                     p_matrix * (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
                 )
-                print('===========rpr_matrix===========')
-                print((curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1))
-                print('===========p_matrix==============')
-                print(p_matrix)
-                print('=========target_matrix===============')
-                print(triangle_matrix)
             else:
                 triangle_matrix = torch.triu(
                     (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
@@ -266,7 +256,7 @@ def multiclass_metric_loss_fast_optimized(
                     torch.clamp(margin - 1 / dim * (matrix**2), min=0)
                 )
                 num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
-        raise ValueError("error!")
+    raise ValueError("error!")
 
     if num_intra > 0 and not (per_class_norm):
         loss_intra = loss_intra / num_intra
