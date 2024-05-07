@@ -211,6 +211,8 @@ def multiclass_metric_loss_fast_optimized(
                 print((curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1))
                 print('===========p_matrix==============')
                 print(p_matrix)
+                print('=========target_matrix===============')
+                print(triangle_matrix)
             else:
                 triangle_matrix = torch.triu(
                     (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
@@ -239,6 +241,20 @@ def multiclass_metric_loss_fast_optimized(
             if probabilities != None:
                 p_matrix = curr_p.unsqueeze(1) * cls_p[k]
                 matrix = (p_matrix * (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
+                print("===========curr_repr===============")
+                print(curr_repr)
+                print("===========cls_repr===============")
+                print(cls_repr[k])
+                print('===========rpr_matrix===========')
+                print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1))
+                print("===========curr_p===============")
+                print(curr_p)
+                print("===========cls_p===============")
+                print(cls_p[k])
+                print('===========p_matrix==============')
+                print(p_matrix)
+                print('=========target_matrix===============')
+                print(matrix)
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
             if per_class_norm:
@@ -250,6 +266,7 @@ def multiclass_metric_loss_fast_optimized(
                     torch.clamp(margin - 1 / dim * (matrix**2), min=0)
                 )
                 num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
+        raise ValueError("error!")
 
     if num_intra > 0 and not (per_class_norm):
         loss_intra = loss_intra / num_intra
