@@ -665,6 +665,6 @@ class SelectiveTrainer(Trainer):
             return (loss, None, None)
 
         logits = nested_detach(logits)
-        print(logits)
+        self.log(logits)
 
         return (loss, logits, labels)
