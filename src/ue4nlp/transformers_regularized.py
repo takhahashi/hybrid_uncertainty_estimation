@@ -665,8 +665,6 @@ class SelectiveTrainer(Trainer):
             return (loss, None, None)
 
         logits = nested_detach(logits)
-        if len(logits) == 1:
-            logits = logits[0]
         print(logits)
 
         return (loss, logits, labels)
