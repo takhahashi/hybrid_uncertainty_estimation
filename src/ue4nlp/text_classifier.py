@@ -65,7 +65,7 @@ class TextClassifier:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset)
-        print('-----------------------',res[2],'-----------------------')
+        print('-----------------------',res,'-----------------------')
         logits = res[0]
         if isinstance(logits, tuple):
             logits = logits[0]
