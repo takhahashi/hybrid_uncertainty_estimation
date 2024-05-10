@@ -11,6 +11,7 @@ import pickle
 import json
 import os
 
+from utils.classification_models import HybridBert
 from . import alpaca_calibrator as calibrator
 
 import logging
@@ -66,15 +67,17 @@ class TextClassifier:
 
         res = self._trainer.predict(eval_dataset)
         print('-----------------------',res,'-----------------------')
-        logits = res[0]
-        print(logits)
-        print(logits[0])
-        if isinstance(logits, tuple):
-            logits = logits[0]
-        if self.selectivenet:
-            n_cols = logits.shape[-1]
-            n_cls = int((n_cols - 1) / 2)
-            logits = logits[:, -n_cls:]
+        if isinstance(self._auto_model, HybridBert):
+            logits = res['predictions'][0]
+            reg_output = res['predictions'][1]
+        else:
+            logits = res[0]
+            if isinstance(logits, tuple):
+                logits = logits[0]
+            if self.selectivenet:
+                n_cols = logits.shape[-1]
+                n_cls = int((n_cols - 1) / 2)
+                logits = logits[:, -n_cls:]
 
         if calibrate:
             labels = [example["label"] for example in eval_dataset]
@@ -97,9 +100,10 @@ class TextClassifier:
 
         if not return_preds:
             return [probs] + list(res)
-
-        preds = np.argmax(probs, axis=1)
-
+        if isinstance(self._auto_model, HybridBert):
+            preds = np.round(reg_output.view(-1).detach().numpy() * (self._auto_model.num_labels - 1))
+        else:
+            preds = np.argmax(probs, axis=1)
         return [preds, probs] + list(res)
     
     
