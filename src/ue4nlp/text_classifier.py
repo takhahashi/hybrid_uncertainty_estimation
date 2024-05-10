@@ -67,6 +67,8 @@ class TextClassifier:
         res = self._trainer.predict(eval_dataset)
         print('-----------------------',res,'-----------------------')
         logits = res[0]
+        print(logits)
+        print(logits[0])
         if isinstance(logits, tuple):
             logits = logits[0]
         if self.selectivenet:
@@ -99,3 +101,5 @@ class TextClassifier:
         preds = np.argmax(probs, axis=1)
 
         return [preds, probs] + list(res)
+    
+    
