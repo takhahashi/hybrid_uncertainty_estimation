@@ -101,7 +101,7 @@ class TextClassifier:
         if not return_preds:
             return [probs] + list(res)
         if isinstance(self._auto_model, HybridBert):
-            preds = np.round(torch.flatten(reg_output).detach().numpy() * (self._auto_model.num_labels - 1))
+            preds = np.round(reg_output.squeeze().detach().numpy() * (self._auto_model.num_labels - 1))
         else:
             preds = np.argmax(probs, axis=1)
         return [preds, probs] + list(res)
