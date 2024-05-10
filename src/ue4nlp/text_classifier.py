@@ -67,8 +67,8 @@ class TextClassifier:
 
         res = self._trainer.predict(eval_dataset)
         if isinstance(self._auto_model, HybridBert):
-            logits = res['predictions'][0]
-            reg_output = res['predictions'][1]
+            logits = res[0][0]
+            reg_output = res[0][1]
         else:
             logits = res[0]
             if isinstance(logits, tuple):
