@@ -66,7 +66,6 @@ class TextClassifier:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset)
-        print('-----------------------',res,'-----------------------')
         if isinstance(self._auto_model, HybridBert):
             logits = res['predictions'][0]
             reg_output = res['predictions'][1]
