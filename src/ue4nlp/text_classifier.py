@@ -69,6 +69,7 @@ class TextClassifier:
         if isinstance(self._auto_model, HybridBert):
             logits = res[0][0]
             reg_output = res[0][1]
+            print(reg_output)
         else:
             logits = res[0]
             if isinstance(logits, tuple):
