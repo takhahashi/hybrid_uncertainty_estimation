@@ -215,6 +215,7 @@ def do_predict_eval(
 
         res = cls.predict(eval_dataset)
         preds, probs = res[:2]
+        
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
 
