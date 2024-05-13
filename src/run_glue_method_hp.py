@@ -162,7 +162,7 @@ def compute_metrics(is_regression, metric, label_num, p: EvalPrediction):
     preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
     preds = np.squeeze(np.round(p.predictions[1] * (label_num - 1))) if is_regression else np.argmax(preds, axis=1)
     print('Is_Regression',is_regression)
-    print(p.label_ids)
+    print(f'regressor_preds:{preds}')
 
     result = metric.compute(predictions=preds, references=p.label_ids)
     if len(result) > 1:
