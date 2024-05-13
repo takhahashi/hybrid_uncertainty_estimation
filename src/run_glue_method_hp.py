@@ -157,10 +157,10 @@ def calculate_dropouts(model):
     return res
 
 
-def compute_metrics(is_regression, metric, p: EvalPrediction):
-    print(p.predictions)
+def compute_metrics(is_regression, metric, label_num, p: EvalPrediction):
+
     preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
-    preds = np.squeeze(preds) if is_regression else np.argmax(preds, axis=1)
+    preds = np.squeeze(np.round(p.predictions[1] * (label_num - 1))) if is_regression else np.argmax(preds, axis=1)
 
     result = metric.compute(predictions=preds, references=p.label_ids)
     if len(result) > 1:
@@ -443,8 +443,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         test_dataset = (
             datasets["test"] if config.do_eval or config.do_ue_estimate else None
         )
-    is_regression = False
-    metric_fn = lambda p: compute_metrics(is_regression, metric, p)
+    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+        is_regression = True
+    else:
+        is_regression = False
+    metric_fn = lambda p: compute_metrics(is_regression, metric, num_labels, p)
 
     if config.do_train:
         """
