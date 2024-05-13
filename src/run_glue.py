@@ -231,7 +231,6 @@ def do_predict_eval(
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
         preds, probs = res[:2]
-        print(f'regressor_preds:{preds}')
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
 
