@@ -892,7 +892,7 @@ class HybridBert(BertForSequenceClassification):
         if not return_dict:
             output = (logits,) + outputs[2:]
             return ((loss,) + output) if loss is not None else output
-        print(regressor_output)
+        
 
         return HybridOutput(
             loss=loss,
