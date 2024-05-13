@@ -280,6 +280,7 @@ def do_predict_eval(
 
     if wandb.run is not None:
         wandb.save(str(Path(work_dir) / "dev_inference.json"))
+    print(eval_results)
 
 
 def train_eval_glue_model(config, training_args, data_args, work_dir):
