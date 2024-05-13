@@ -882,8 +882,6 @@ class HybridBert(BertForSequenceClassification):
             
             ########regression loss########
             reg_labels = labels.view(-1) / (self.num_labels - 1)
-            print(reg_labels)
-            exit()
             loss_fct = MSELoss()
             r_loss = loss_fct(regressor_output.view(-1), reg_labels)
             
