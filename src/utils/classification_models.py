@@ -811,7 +811,7 @@ def create_hybridbert(
     config,
 ):
     model_kwargs = dict(
-        model_args=[ue_args.reg_type],
+        reg_type=ue_args.reg_type,
         from_tf=False,
         config=model_config,
         cache_dir=config.cache_dir,
