@@ -811,6 +811,7 @@ def create_hybridbert(
     config,
 ):
     model_kwargs = dict(
+        model_args=[ue_args.reg_type],
         from_tf=False,
         config=model_config,
         cache_dir=config.cache_dir,
@@ -834,14 +835,18 @@ class HybridOutput(SequenceClassifierOutput):
 
 
 class HybridBert(BertForSequenceClassification):
-    def __init__(self, config):
+    def __init__(self, reg_type, config):
         super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
         self.lsb = ScaleDiffBalance(task_names=['regression', 'classification'])
         self.scale_weights = {}
         self.diff_weights = {}
-        self.label_distribution = config.label_distribution
+        if reg_type == 'label_distribution':
+            self.label_distribution = True
+        else:
+            self.label_distribution = False
+
 
         nn.init.normal_(self.regressor.weight, std=0.02)  # 重みの初期化
         nn.init.normal_(self.regressor.bias, 0)
