@@ -61,7 +61,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         model_config_name = 'microsoft/debert-v3-base'
     else:
         model_config_name = base_model_name
-    if ue_args.hybrid_classloss == 'label_distribution':
+    if ue_args.reg_type == 'label_distribution':
         label_distribution = True
     else:
         label_distribution = False
