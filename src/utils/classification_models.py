@@ -59,8 +59,11 @@ import pdb
 log = logging.getLogger(__name__)
 
 
-def build_model(model_class, model_path_or_name, **kwargs):
-    return model_class.from_pretrained(model_path_or_name, **kwargs)
+def build_model(model_class, model_path_or_name, reg_type=None, **kwargs):
+    if reg_type is None:
+        return model_class.from_pretrained(model_path_or_name, **kwargs)
+    else:
+        return model_class.from_pretrained(model_path_or_name, reg_type, **kwargs)
 
 
 def load_electra_sn_encoder(model_path_or_name, model):
@@ -811,7 +814,6 @@ def create_hybridbert(
     config,
 ):
     model_kwargs = dict(
-        reg_type=ue_args.reg_type,
         from_tf=False,
         config=model_config,
         cache_dir=config.cache_dir,
@@ -821,7 +823,7 @@ def create_hybridbert(
     else:
         model_name_or_path = model_path_or_name
     model = build_model(
-        HybridBert, model_name_or_path, **model_kwargs
+        HybridBert, model_name_or_path, ue_args.reg_type, **model_kwargs
     )
     return model
 
