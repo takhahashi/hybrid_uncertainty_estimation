@@ -838,6 +838,9 @@ class HybridOutput(SequenceClassifierOutput):
 
 class HybridBert(BertForSequenceClassification):
     def __init__(self, config, reg_type):
+        print('==============================')
+        print(reg_type, config)
+        print('==============================')
         super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
@@ -900,6 +903,8 @@ class HybridBert(BertForSequenceClassification):
             if self.label_distribution:
                 reg_std_err = np.sqrt(((regressor_output.view(-1) - reg_labels) * (self.num_labels - 1)).to('cpu').detach().numpy().copy() ** 2)
                 distribution_label = self.create_distribution_label(reg_std_err, labels.view(-1).to('cpu').detach().numpy().copy())
+                
+                #pdb.set_trace()
                 c_loss = loss_fct(logits.view(-1, self.num_labels), distribution_label)
             else:
                 c_loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
