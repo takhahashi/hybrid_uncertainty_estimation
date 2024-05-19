@@ -837,7 +837,7 @@ class HybridOutput(SequenceClassifierOutput):
 
 
 class HybridBert(BertForSequenceClassification):
-    def __init__(self, reg_type, config):
+    def __init__(self, config, reg_type):
         print('==============================')
         print(reg_type, config)
         print('==============================')
