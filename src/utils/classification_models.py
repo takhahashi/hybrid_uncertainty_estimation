@@ -48,11 +48,13 @@ from collections import defaultdict
 import numpy as np
 from torch.nn.utils import spectral_norm
 import torch
+from scipy import stats
 import logging
 import os
 from pathlib import Path
 from typing import Optional, Tuple
 from safetensors.torch import load_file
+import pdb
 
 log = logging.getLogger(__name__)
 
@@ -839,6 +841,7 @@ class HybridBert(BertForSequenceClassification):
         self.lsb = ScaleDiffBalance(task_names=['regression', 'classification'])
         self.scale_weights = {}
         self.diff_weights = {}
+        self.label_distribution = config.label_distribution
 
         nn.init.normal_(self.regressor.weight, std=0.02)  # 重みの初期化
         nn.init.normal_(self.regressor.bias, 0)
@@ -880,18 +883,28 @@ class HybridBert(BertForSequenceClassification):
 
         loss = None
         if labels is not None:
-            ########classification loss#########
-            loss_fct = CrossEntropyLoss()
-            c_loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
-            
             ########regression loss########
             reg_labels = labels.view(-1) / (self.num_labels - 1)
             loss_fct = MSELoss()
-            r_loss = loss_fct(regressor_output.view(-1), reg_labels)
+            r_loss = loss_fct(regressor_output.view(-1), reg_labels)           
+            
+            ########classification loss#########
+            loss_fct = CrossEntropyLoss()
+            if self.label_distribution:
+                reg_std_err = np.sqrt(((regressor_output.view(-1) - reg_labels) * (self.num_labels - 1)).to('cpu').detach().numpy().copy() ** 2)
+                distribution_label = self.create_distribution_label(reg_std_err, labels.view(-1).to('cpu').detach().numpy().copy())
+                
+                pdb.set_trace()
+                c_loss = loss_fct(logits.view(-1, self.num_labels), distribution_label)
+            else:
+                c_loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+
             
             loss, s_wei, diff_wei, alpha, pre_loss = self.lsb(regression=r_loss, classification=c_loss)
             self.scale_weights = s_wei
             self.diff_weights = diff_wei
+
+            
 
         if not return_dict:
             output = (logits,) + outputs[2:]
@@ -905,6 +918,14 @@ class HybridBert(BertForSequenceClassification):
             hidden_states=outputs.hidden_states,
             attentions=outputs.attentions,
         )
+    
+    def create_distribution_label(self, reg_std_err, labels):
+        distribution_label = []
+        for mu, std in zip(labels, reg_std_err):
+            norm_pdf_label = [stats.norm.pdf(x=i, loc=mu, scale=std) for i in range(self.num_labels)]
+            distribution_label.append(norm_pdf_label)
+        return torch.tensor(distribution_label).cuda()
+
         
 class ScaleDiffBalance:
   def __init__(self, task_names, priority=None, beta=1.):
