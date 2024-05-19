@@ -61,11 +61,16 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         model_config_name = 'microsoft/debert-v3-base'
     else:
         model_config_name = base_model_name
+    if model_args.label_distribution == True:
+        label_distribution = True
+    else:
+        label_distribution = False
     model_config = AutoConfig.from_pretrained(
         model_config_name,
         num_labels=num_labels,
         finetuning_task=data_args.task_name,
         cache_dir=config.cache_dir,
+        label_distribution = label_distribution,
     )
 
     if (
