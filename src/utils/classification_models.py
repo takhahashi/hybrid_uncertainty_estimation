@@ -60,10 +60,10 @@ log = logging.getLogger(__name__)
 
 
 def build_model(model_class, model_path_or_name, reg_type=None, **kwargs):
-    if reg_type is None:
-        return model_class.from_pretrained(model_path_or_name, **kwargs)
-    else:
+    if reg_type == 'label_distribution':
         return model_class.from_pretrained(model_path_or_name, reg_type, **kwargs)
+    else:
+        return model_class.from_pretrained(model_path_or_name, **kwargs)
 
 
 def load_electra_sn_encoder(model_path_or_name, model):
@@ -838,6 +838,9 @@ class HybridOutput(SequenceClassifierOutput):
 
 class HybridBert(BertForSequenceClassification):
     def __init__(self, reg_type, config):
+        print('==============================')
+        print(reg_type, config)
+        print('==============================')
         super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
