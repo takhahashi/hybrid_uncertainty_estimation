@@ -837,7 +837,7 @@ class HybridOutput(SequenceClassifierOutput):
 
 
 class HybridBert(BertForSequenceClassification):
-    def __init__(self, config, reg_type):
+    def __init__(self, config, reg_type=None):
         super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
