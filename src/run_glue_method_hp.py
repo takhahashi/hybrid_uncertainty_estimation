@@ -473,7 +473,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
     training_args = update_config(training_args, {'metric_for_best_model':'eval_loss'})
     training_args = update_config(training_args, {'save_strategy':'epoch'})
-    training_args = update_config(training_args, {'reprot_to':'none'})
     if "patience" in config.training.keys():
         earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
         callbacks = [earlystopping]
@@ -550,12 +549,12 @@ def fix_config(config):
     config_name=get_config()[1],
 )
 def main(config):
-    #os.environ["WANDB_WATCH"] = "False"  # To disable Huggingface logging
+    os.environ["WANDB_WATCH"] = "False"  # To disable Huggingface logging
     auto_generated_dir = os.getcwd()
     log.info(f"Work dir: {auto_generated_dir}")
     os.chdir(hydra.utils.get_original_cwd())
 
-    #init_wandb(auto_generated_dir, config)
+    init_wandb(auto_generated_dir, config)
 
     fix_config(config)
 
