@@ -900,9 +900,7 @@ class HybridBert(BertForSequenceClassification):
             if self.label_distribution:
                 reg_std_err = np.sqrt(((regressor_output.view(-1) - reg_labels) * (self.num_labels - 1)).to('cpu').detach().numpy().copy() ** 2)
                 distribution_label = self.create_distribution_label(reg_std_err, labels.view(-1).to('cpu').detach().numpy().copy())
-                print("=====label_distribution========")
-                print("=====label_distribution========")
-                print("=====label_distribution========")
+
                 #pdb.set_trace()
                 c_loss = loss_fct(logits.view(-1, self.num_labels), distribution_label)
             else:
