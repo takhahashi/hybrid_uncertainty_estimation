@@ -838,9 +838,6 @@ class HybridOutput(SequenceClassifierOutput):
 
 class HybridBert(BertForSequenceClassification):
     def __init__(self, config, reg_type):
-        print('==============================')
-        print(reg_type, config)
-        print('==============================')
         super().__init__(config)
         self.regressor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
@@ -904,7 +901,7 @@ class HybridBert(BertForSequenceClassification):
                 reg_std_err = np.sqrt(((regressor_output.view(-1) - reg_labels) * (self.num_labels - 1)).to('cpu').detach().numpy().copy() ** 2)
                 distribution_label = self.create_distribution_label(reg_std_err, labels.view(-1).to('cpu').detach().numpy().copy())
                 
-                #pdb.set_trace()
+                pdb.set_trace()
                 c_loss = loss_fct(logits.view(-1, self.num_labels), distribution_label)
             else:
                 c_loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
@@ -934,7 +931,7 @@ class HybridBert(BertForSequenceClassification):
         for mu, std in zip(labels, reg_std_err):
             norm_pdf_label = [stats.norm.pdf(x=i, loc=mu, scale=std) for i in range(self.num_labels)]
             distribution_label.append(norm_pdf_label)
-        return torch.tensor(distribution_label).cuda()
+        return torch.tensor(distribution_label).softmax(dim=1).cuda()
 
         
 class ScaleDiffBalance:
