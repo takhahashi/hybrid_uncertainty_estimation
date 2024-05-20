@@ -25,6 +25,7 @@ def get_trainer(
     training_args.save_total_limit = 1
     training_args.save_steps = 1e5
     training_args.task = task
+    print(training_args)
     if not use_selective and not use_sngp:
         trainer = Trainer(
             model=model,
