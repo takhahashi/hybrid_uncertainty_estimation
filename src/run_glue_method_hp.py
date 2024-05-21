@@ -470,7 +470,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
     
     training_args = update_config(training_args, {'load_best_model_at_end':True})
-    training_args = update_config(training_args, {'evaluation_strategy':'epoch'})
+    training_args = update_config(training_args, {'eval_strategy':'epoch'})
     training_args = update_config(training_args, {'metric_for_best_model':'eval_loss'})
     training_args = update_config(training_args, {'save_strategy':'epoch'})
     if "patience" in config.training.keys():
