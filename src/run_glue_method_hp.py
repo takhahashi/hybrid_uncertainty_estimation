@@ -586,6 +586,7 @@ def main(config):
             train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
     else:
         log.info(f"Result file: {auto_generated_dir}/{filename} already exists \n")
+    wandb.finish()
 
 
 if __name__ == "__main__":
