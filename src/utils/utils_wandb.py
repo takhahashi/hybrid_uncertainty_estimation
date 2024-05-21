@@ -25,7 +25,7 @@ def init_wandb(directory, config):
     # setting up env variables
     # os.environ["WANDB_ENTITY"] = "artem105"
     os.environ["WANDB_PROJECT"] = "uncertainty-estimation"
-    os.environ["WANDB_DISABLED"] = "true"
+    #os.environ["WANDB_DISABLED"] = "true"
 
     # generating group name and run name
     directory_contents = directory.split("/")
