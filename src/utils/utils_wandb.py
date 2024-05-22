@@ -16,7 +16,7 @@ def _wandb_log(_dict):
 wandb.log_opt = _wandb_log
 
 
-def init_wandb(directory, config):
+def init_wandb(directory, config, wandb_disabled=False):
     if "NO_WANDB" in os.environ and os.environ["NO_WANDB"] == "true":
         ## working without wandb :c
         log.info("== Working without wandb")
@@ -25,7 +25,8 @@ def init_wandb(directory, config):
     # setting up env variables
     # os.environ["WANDB_ENTITY"] = "artem105"
     os.environ["WANDB_PROJECT"] = "uncertainty-estimation"
-    #os.environ["WANDB_DISABLED"] = "true"
+    if wandb_disabled:
+        os.environ["WANDB_DISABLED"] = "true"
 
     # generating group name and run name
     directory_contents = directory.split("/")

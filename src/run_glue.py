@@ -636,7 +636,7 @@ def main(config):
     os.chdir(hydra.utils.get_original_cwd())
 
 
-    init_wandb(auto_generated_dir, config)
+    init_wandb(auto_generated_dir, config, wandb_disabled=True)
 
     fix_config(config)
 
