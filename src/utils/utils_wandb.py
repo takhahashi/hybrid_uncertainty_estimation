@@ -46,8 +46,12 @@ def init_wandb(directory, config, wandb_disabled=False):
         model_name = 'deberta'
     else:
         model_name = config.model.model_name_or_path
-    project_name = f'{model_name}_' + f'lossreg-{config.ue.reg_type}_' + f'promptid-{config.data.prompt_id}'
-    run_name = f'fold_{config.data.fold}'
+    if wandb_disabled:
+        project_name=None
+        run_name=None
+    else:
+        project_name = f'{model_name}_' + f'lossreg-{config.ue.reg_type}_' + f'promptid-{config.data.prompt_id}'
+        run_name = f'fold_{config.data.fold}'
     return wandb.init(
         project = project_name,
         name=run_name,
