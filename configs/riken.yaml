@@ -1,0 +1,39 @@
+hydra:
+  run:
+    dir: ${output_dir}
+  sweep:
+    dir: ${output_dir}/${ue.reg_type}/riken
+    subdir: ${data.question_id}_${data.prompt_id}_${data.score_id}/fold_${data.fold}
+
+model:
+    model_name_or_path: 'google/electra-base-discriminator'
+
+ue: ???
+training: ???
+    
+data:
+    task_name: 'riken'
+    question_id: 'Y15'
+    prompt_id: '2-3_1_5'
+    score_id: 'A_Score'
+    fold: 0
+    subsample_perc: 0.0
+    max_seq_length: 512
+    validation_subsample: 0.0
+    validation_seed: 42
+    data_path: '/content/drive/MyDrive/GoogleColab/SA/ShortAnswer'
+  
+spectralnorm_layer: 'last'
+cache_dir: '../workdir/cache/'
+output_dir: '../workdir/results/'
+seed: fold_${data.fold}
+suffix: ''
+do_train: True
+do_eval: True
+do_ue_estimate: True
+reset_params: False
+repeat: 0
+
+defaults:
+  - training: electra_base
+  - ue: mc-dpp

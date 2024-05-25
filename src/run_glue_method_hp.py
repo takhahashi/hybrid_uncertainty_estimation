@@ -255,10 +255,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     model_args = config.model
 
     log.info(f"Seed: {config.seed}")
-    if config.do_train and (config.data.task_name != 'asap' and config.data.task_name != 'riken'):
-        set_seed(config.seed)
-        random.seed(config.seed)
-        training_args.seed = config.seed
 
     ############### Loading dataset ######################
 

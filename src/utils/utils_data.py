@@ -17,6 +17,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from functools import reduce
 from utils.utils_data_score_range import upper_score_dic, asap_ranges
+import pdb
 
 import logging
 
@@ -140,6 +141,8 @@ def load_data(config):
         )
     elif "asap" in config.data.task_name:
         datasets = load_asap(config)
+    elif "riken" in config.data.task_name:
+        datasets = load_riken(config)
     else:
         raise ValueError(f"Cannot load dataset with this name: {config.data.task_name}")
     if config.data.get("balance_classes", False):
@@ -200,6 +203,38 @@ def load_asap(config):
     low, high = asap_ranges[config.data.prompt_id]
 
     train_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/train.tsv'
+    train_dataf = pd.read_table(train_datapath, sep='\t')
+    train_p = train_dataf[train_dataf["essay_set"] == config.data.prompt_id]
+    train_x = train_p["essay"].tolist()
+    train_y = get_model_friendly_scores(config, np.array(train_p["domain1_score"]), high, low).tolist()
+
+    validation_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/dev.tsv'
+    validation_dataf = pd.read_table(validation_datapath, sep='\t')
+    validation_p = validation_dataf[validation_dataf["essay_set"] == config.data.prompt_id]
+    validation_x = validation_p["essay"].tolist()
+    validation_y = get_model_friendly_scores(config, np.array(validation_p["domain1_score"]), high, low).tolist()
+
+    test_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/test.tsv'
+    test_dataf = pd.read_table(test_datapath, sep='\t')
+    test_p = test_dataf[test_dataf["essay_set"] == config.data.prompt_id]
+    test_x = test_p["essay"].tolist()
+    test_y = get_model_friendly_scores(config, np.array(test_p["domain1_score"]), high, low).tolist()
+    pdb.set_trace()
+    datasets = DatasetDict(
+        {
+            "train": Dataset.from_dict({"text": train_x, "label": train_y}),
+            "validation": Dataset.from_dict({"text": validation_x, "label": validation_y}),
+            "test": Dataset.from_dict({"text": test_x, "label": test_y}),
+        }
+    )
+    return datasets
+
+def load_riken(config):
+    high = upper_score_dic[config.data.prompt_id]
+    low = 0
+    #/${sas.prompt_id}/${sas.question_id}_data/${sas.prompt_id}_${sas.question_id}_fold${training.fold}/train_data.json
+
+    train_datapath = config.data.data_path + f'/{config.data.question_id}/{config.data.prompt_id}_data/{config.data.question_id}_{config.data.prompt_id}_fold{config.data.fold}' + '/train_data.json'
     train_dataf = pd.read_table(train_datapath, sep='\t')
     train_p = train_dataf[train_dataf["essay_set"] == config.data.prompt_id]
     train_x = train_p["essay"].tolist()
