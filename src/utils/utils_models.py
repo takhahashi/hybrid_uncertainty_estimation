@@ -56,9 +56,15 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         else fairlib_args.model_name
     )
     if 'hybridbert' == base_model_name:
-        model_config_name = 'bert-base-uncased'
+        if data_args.task_name == 'riken':
+            model_config_name = 'cl-tohoku/bert-base-japanese-v3'
+        else:
+            model_config_name = 'bert-base-uncased'
     elif 'hybriddeberta' == base_model_name:
-        model_config_name = 'microsoft/debert-v3-base'
+        if data_args.task_name == 'riken':
+            model_config_name = 'ku-nlp/deberta-v2-base-japanese'
+        else:
+            model_config_name = 'microsoft/debert-v3-base'
     else:
         model_config_name = base_model_name
 
@@ -84,9 +90,15 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         tokenizer._call_one = lambda text, text_pair, *args, **kwargs: text
     else:
         if 'hybridbert' == base_model_name:
-            model_tokenizer_name = 'bert-base-uncased'
+            if data_args.task_name == 'riken':
+                model_config_name = 'cl-tohoku/bert-base-japanese-v3'
+            else:
+                model_config_name = 'bert-base-uncased'
         elif 'hybriddeberta' == base_model_name:
-            model_tokenizer_name = 'microsoft/debert-v3-base' 
+            if data_args.task_name == 'riken':
+                model_config_name = 'ku-nlp/deberta-v2-base-japanese'
+            else:
+                model_config_name = 'microsoft/debert-v3-base'
         else:
             model_tokenizer_name = base_model_name
         tokenizer = AutoTokenizer.from_pretrained(

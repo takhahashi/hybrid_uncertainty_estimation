@@ -76,6 +76,7 @@ task_to_keys = {
     "trustpilot": ("text", "avg_embedding"),
     "jigsaw_race": ("comment_text", "bert_avg_SE"),
     "asap": ("text", None),
+    "riken": ("text", None),
 }
 
 def get_score_range(task_name, prompt_id):
@@ -230,27 +231,28 @@ def load_asap(config):
     return datasets
 
 def load_riken(config):
-    high = upper_score_dic[config.data.prompt_id]
+    high = upper_score_dic[config.data.prompt_id][config.data.score_id]
     low = 0
     #/${sas.prompt_id}/${sas.question_id}_data/${sas.prompt_id}_${sas.question_id}_fold${training.fold}/train_data.json
 
     train_datapath = config.data.data_path + f'/{config.data.question_id}/{config.data.prompt_id}_data/{config.data.question_id}_{config.data.prompt_id}_fold{config.data.fold}' + '/train_data.json'
-    train_dataf = pd.read_table(train_datapath, sep='\t')
-    train_p = train_dataf[train_dataf["essay_set"] == config.data.prompt_id]
-    train_x = train_p["essay"].tolist()
-    train_y = get_model_friendly_scores(config, np.array(train_p["domain1_score"]), high, low).tolist()
+    with open(train_datapath) as f:
+        train_dataf = json.load(f)
+    train_x = [row['mecab'].replace(' ','') for row in train_dataf]
+    train_y = get_model_friendly_scores(config, np.array(train_dataf[config.data.score_id]), high, low).tolist()
 
-    validation_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/dev.tsv'
-    validation_dataf = pd.read_table(validation_datapath, sep='\t')
-    validation_p = validation_dataf[validation_dataf["essay_set"] == config.data.prompt_id]
-    validation_x = validation_p["essay"].tolist()
-    validation_y = get_model_friendly_scores(config, np.array(validation_p["domain1_score"]), high, low).tolist()
+    validation_datapath = config.data.data_path + f'/{config.data.question_id}/{config.data.prompt_id}_data/{config.data.question_id}_{config.data.prompt_id}_fold{config.data.fold}' + '/dev_data.json'
+    with open(validation_datapath) as f:
+        validation_dataf = json.load(f)
+    validation_x = [row['mecab'].replace(' ','') for row in validation_dataf]
+    validation_y = get_model_friendly_scores(config, np.array(validation_dataf[config.data.score_id]), high, low).tolist()
+    
+    test_datapath = config.data.data_path + f'/{config.data.question_id}/{config.data.prompt_id}_data/{config.data.question_id}_{config.data.prompt_id}_fold{config.data.fold}' + '/test_data.json'
+    with open(test_datapath) as f:
+        test_dataf = json.load(f)
+    test_x = [row['mecab'].replace(' ','') for row in test_dataf]
+    test_y = get_model_friendly_scores(config, np.array(test_dataf[config.data.score_id]), high, low).tolist()
 
-    test_datapath = config.data.data_path + f'/fold_{config.data.fold}' + '/test.tsv'
-    test_dataf = pd.read_table(test_datapath, sep='\t')
-    test_p = test_dataf[test_dataf["essay_set"] == config.data.prompt_id]
-    test_x = test_p["essay"].tolist()
-    test_y = get_model_friendly_scores(config, np.array(test_p["domain1_score"]), high, low).tolist()
     datasets = DatasetDict(
         {
             "train": Dataset.from_dict({"text": train_x, "label": train_y}),
