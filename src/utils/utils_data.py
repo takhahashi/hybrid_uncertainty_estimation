@@ -220,7 +220,7 @@ def load_asap(config):
     test_p = test_dataf[test_dataf["essay_set"] == config.data.prompt_id]
     test_x = test_p["essay"].tolist()
     test_y = get_model_friendly_scores(config, np.array(test_p["domain1_score"]), high, low).tolist()
-    pdb.set_trace()
+
     datasets = DatasetDict(
         {
             "train": Dataset.from_dict({"text": train_x, "label": train_y}),
@@ -252,7 +252,7 @@ def load_riken(config):
         test_dataf = json.load(f)
     test_x = [row['mecab'].replace(' ','') for row in test_dataf]
     test_y = get_model_friendly_scores(config, np.array(test_dataf[config.data.score_id]), high, low).tolist()
-
+    pdb.set_trace()
     datasets = DatasetDict(
         {
             "train": Dataset.from_dict({"text": train_x, "label": train_y}),
