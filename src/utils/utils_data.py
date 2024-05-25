@@ -238,6 +238,7 @@ def load_riken(config):
     train_datapath = config.data.data_path + f'/{config.data.question_id}/{config.data.prompt_id}_data/{config.data.question_id}_{config.data.prompt_id}_fold{config.data.fold}' + '/train_data.json'
     with open(train_datapath) as f:
         train_dataf = json.load(f)
+    pdb.set_trace()
     train_x = [row['mecab'].replace(' ','') for row in train_dataf]
     train_y = get_model_friendly_scores(config, np.array(train_dataf[config.data.score_id]), high, low).tolist()
 
@@ -252,7 +253,7 @@ def load_riken(config):
         test_dataf = json.load(f)
     test_x = [row['mecab'].replace(' ','') for row in test_dataf]
     test_y = get_model_friendly_scores(config, np.array(test_dataf[config.data.score_id]), high, low).tolist()
-    pdb.set_trace()
+    
     datasets = DatasetDict(
         {
             "train": Dataset.from_dict({"text": train_x, "label": train_y}),
