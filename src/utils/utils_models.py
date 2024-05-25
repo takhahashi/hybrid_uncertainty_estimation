@@ -91,14 +91,14 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     else:
         if 'hybridbert' == base_model_name:
             if data_args.task_name == 'riken':
-                model_config_name = 'cl-tohoku/bert-base-japanese-v3'
+                model_tokenizer_name = 'cl-tohoku/bert-base-japanese-v3'
             else:
-                model_config_name = 'bert-base-uncased'
+                model_tokenizer_name = 'bert-base-uncased'
         elif 'hybriddeberta' == base_model_name:
             if data_args.task_name == 'riken':
-                model_config_name = 'ku-nlp/deberta-v2-base-japanese'
+                model_tokenizer_name = 'ku-nlp/deberta-v2-base-japanese'
             else:
-                model_config_name = 'microsoft/debert-v3-base'
+                model_tokenizer_name = 'microsoft/debert-v3-base'
         else:
             model_tokenizer_name = base_model_name
         tokenizer = AutoTokenizer.from_pretrained(
