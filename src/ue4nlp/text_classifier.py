@@ -99,10 +99,10 @@ class TextClassifier:
 
         if not return_preds:
             return [probs] + list(res)
-        if isinstance(self._auto_model, HybridBert):
-            preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
-        else:
-            preds = np.argmax(probs, axis=1)
+        #if isinstance(self._auto_model, HybridBert):
+        #    preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
+        #else:
+        preds = np.argmax(probs, axis=1)
         return [preds, probs] + list(res)
     
     
