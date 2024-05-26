@@ -57,7 +57,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     )
     if 'hybridbert' == base_model_name:
         if data_args.task_name == 'riken':
-            model_config_name = 'cl-tohoku/bert-base-japanese-v3'
+            model_config_name = 'tohoku-nlp/bert-base-japanese-v3'
         else:
             model_config_name = 'bert-base-uncased'
     elif 'hybriddeberta' == base_model_name:
