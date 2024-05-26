@@ -48,6 +48,7 @@ from utils.utils_data import (
     task_to_keys,
     simple_collate_fn,
     get_score_range,
+    upper_score_dic,
 )
 from utils.utils_models import create_model
 
@@ -313,8 +314,12 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         label_list = datasets["train"].unique("label")
         label_list.sort()  # Let's sort it for determinism
 
-    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
+    if config.data.task_name == 'asap':
         low, high = get_score_range(config.data.task_name, config.data.prompt_id)
+        num_labels = high - low + 1
+    elif config.data.task_name == 'riken':
+        high = upper_score_dic[config.data.prompt_id][config.data.score_id]
+        low = 0
         num_labels = high - low + 1
     else:
         num_labels = len(label_list)
