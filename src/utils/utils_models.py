@@ -91,7 +91,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     else:
         if 'hybridbert' == base_model_name:
             if data_args.task_name == 'riken':
-                model_tokenizer_name = 'cl-tohoku/bert-base-japanese-v3'
+                model_tokenizer_name = 'tohoku-nlp/bert-base-japanese-v3'
             else:
                 model_tokenizer_name = 'bert-base-uncased'
         elif 'hybriddeberta' == base_model_name:
