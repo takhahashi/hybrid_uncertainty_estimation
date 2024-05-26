@@ -50,7 +50,10 @@ def init_wandb(directory, config, wandb_disabled=False):
         project_name=None
         run_name=None
     else:
-        project_name = f'{model_name}_' + f'lossreg-{config.ue.reg_type}_' + f'promptid-{config.data.prompt_id}'
+        if config.data.task_name == 'asap':
+            project_name = f'{model_name}_' + f'lossreg-{config.ue.reg_type}_' + f'promptid-{config.data.prompt_id}'
+        elif config.data.task_name == 'riken':
+            project_name = f'{model_name}_' + f'lossreg-{config.ue.reg_type}_' + f'{config.data.question_id}_{config.data.prompt_id}_{config.data.score_id}'
         run_name = f'fold_{config.data.fold}'
     return wandb.init(
         project = project_name,
