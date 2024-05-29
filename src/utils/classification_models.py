@@ -1092,6 +1092,5 @@ class BertForSequenceRegression(BertPreTrainedModel):
 
     def loss(self, pred_score, pred_lnvar, labels):    
         loss = torch.exp(-pred_lnvar)*torch.pow(labels - pred_score, 2)/2 + pred_lnvar/2
-        pdb.set_trace()
         loss = torch.sum(loss)
         return loss
