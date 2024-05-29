@@ -88,6 +88,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
         elif 'riken' in config.config_path:
+            model_type = config.model_series_dir.split('/')[-3].split('_')[0]
             riken_ids = config.model_series_dir.split('/')[-1].split('_')
             question_id = riken_ids[0]
             prompt_id = riken_ids[1]+'_'+riken_ids[2]+'_'+riken_ids[3]
@@ -100,6 +101,8 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.score_id={score_id}"
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
+            args_str += " "
+            args_str += f"model.model_type={model_type}"
             pdb.set_trace()
         else:
             args_str += " "
