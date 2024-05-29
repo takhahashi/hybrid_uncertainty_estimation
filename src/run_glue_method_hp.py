@@ -49,7 +49,7 @@ from utils.utils_data import (
 from utils.utils_models import create_model
 from ue4nlp.transformers_regularized import SelectiveTrainer
 from utils.utils_tasks import get_config
-from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback
+from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback, RegressionModelCallback
 
 import logging
 
@@ -493,6 +493,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     )
     if model_args.model_name_or_path == 'hybridbert':
         trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
+    trainer.add_callback(RegressionModelCallback(regressor=model, trainer=trainer, eval_dataset=eval_dataset)) 
     if config.do_train:
         trainer.train(
             model_path=model_args.model_name_or_path
