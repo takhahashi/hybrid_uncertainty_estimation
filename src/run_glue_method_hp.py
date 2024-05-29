@@ -49,7 +49,7 @@ from utils.utils_data import (
 from utils.utils_models import create_model
 from ue4nlp.transformers_regularized import SelectiveTrainer
 from utils.utils_tasks import get_config
-from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback, RegressionModelCallback
+from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback
 
 import logging
 
