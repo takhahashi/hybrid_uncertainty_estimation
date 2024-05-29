@@ -161,6 +161,7 @@ class RegressionModelCallback(TrainerCallback):
         self.regressor = regressor
         self.trainer = trainer
         self.eval_dataset = eval_dataset
-    def on_evaluate(self, args, state, control, **kwargs):
+    def on_epoch_end(self, args, state, control, **kwargs):
+        res = self.trainer.predict(self.eval_dataset)
         # ここで評価時の処理をカスタマイズします
-        print(kwargs)
+        print(res)
