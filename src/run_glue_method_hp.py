@@ -575,6 +575,8 @@ def main(config):
     else:
         filename = "dev_inference.json"
 
+    config.ue.use_cache=False
+
     if not os.path.exists(Path(auto_generated_dir) / filename):
         pathdata = "/".join(
             auto_generated_dir.split("/")[-7:-5] + auto_generated_dir.split("/")[-4:-3]
