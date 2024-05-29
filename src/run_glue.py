@@ -20,7 +20,7 @@ import time
 
 from utils.utils_wandb import init_wandb, wandb
 
-from ue4nlp.text_classifier import TextClassifier
+from ue4nlp.text_classifier import TextPredictor
 import pdb
 
 from transformers import (
@@ -212,13 +212,14 @@ def do_predict_eval(
 
     selectivenet = config.ue.reg_type == "selectivenet"
     
-    cls = TextClassifier(
+    cls = TextPredictor(
         model,
         tokenizer,
         training_args=config.training,
         trainer=trainer,
         max_len=max_len,
         selectivenet=selectivenet,
+        model_type=config.model.model_type,
     )
     start_eval_time = time.time()
     if config.do_eval:
@@ -233,20 +234,28 @@ def do_predict_eval(
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
     
-        #if 
-        preds, probs = res[:2]
+        if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
+            preds, probs = res[:2]
 
-        eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+            eval_score = eval_metric.compute(predictions=preds, references=true_labels)
 
-        log.info(f"Eval score: {eval_score}")
-        eval_results["eval_score"] = eval_score
-        eval_results["probabilities"] = probs.tolist()
-        eval_results["answers"] = preds.tolist()
-        if selectivenet:
-            output = res[-3]
-            n_cols = output.shape[-1]
-            n_cls = int((n_cols - 1) / 2)
-            eval_results["selective"] = output[:, n_cls:-n_cls].tolist()
+            log.info(f"Eval score: {eval_score}")
+            eval_results["eval_score"] = eval_score
+            eval_results["probabilities"] = probs.tolist()
+            eval_results["answers"] = preds.tolist()
+            if selectivenet:
+                output = res[-3]
+                n_cols = output.shape[-1]
+                n_cls = int((n_cols - 1) / 2)
+                eval_results["selective"] = output[:, n_cls:-n_cls].tolist()
+        elif config.model.model_type == 'regression':
+            preds, lnvar = res[:2]
+            eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+            log.info(f"Eval score: {eval_score}")
+            eval_results["eval_score"] = eval_score
+            eval_results["lnvar"] = lnvar.tolist()
+            eval_results["answers"] = preds.tolist()
+
     end_eval_time = time.time()
     log.info(f"Eval time {end_eval_time - start_eval_time}")
     eval_results["eval_time"] = end_eval_time - start_eval_time

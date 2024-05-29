@@ -20,7 +20,7 @@ import logging
 log = logging.getLogger("text_classifier")
 
 
-class TextClassifier:
+class TextPredictor:
     def __init__(
         self,
         auto_model,
@@ -31,6 +31,7 @@ class TextClassifier:
         training_args=None,
         trainer=None,
         selectivenet=False,
+        model_type=None,
     ):
         super().__init__()
 
@@ -44,6 +45,7 @@ class TextClassifier:
         self.temperature = 1.0
         self._max_len = max_len
         self.selectivenet = selectivenet
+        self.model_type = model_type
 
     @property
     def _bert_model(self):
@@ -67,11 +69,13 @@ class TextClassifier:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset)
-        pdb.set_trace()
-        if isinstance(self._auto_model, HybridBert):
+        if self.model_type == 'regression':
+            pred_score = res[0][0]
+            pred_lnvar = res[0][1]
+        elif self.model_type == 'hybrid':
             logits = res[0][0]
             reg_output = res[0][1]
-        else:
+        elif self.model_type == 'classification':
             logits = res[0]
             if isinstance(logits, tuple):
                 logits = logits[0]
@@ -79,32 +83,37 @@ class TextClassifier:
                 n_cols = logits.shape[-1]
                 n_cls = int((n_cols - 1) / 2)
                 logits = logits[:, -n_cls:]
-
-        if calibrate:
-            labels = [example["label"] for example in eval_dataset]
-            calibr = calibrator.ModelWithTempScaling(self._auto_model)
-            calibr.scaling(
-                torch.FloatTensor(logits),
-                torch.LongTensor(labels),
-                lr=1e-3,  # TODO:
-                max_iter=100,  # TODO:
-            )
-            self.temperature = calibr.temperature.detach().numpy()[0]
-            self.temperature = np.clip(self.temperature, 0.1, 10)
-
-        logits = np.true_divide(logits, self.temperature)
-
-        if apply_softmax:
-            probs = F.softmax(torch.tensor(logits), dim=1).numpy()
         else:
-            probs = logits
+            raise ValueError(f'{self.model_type} is Invalid model_type')
 
-        if not return_preds:
-            return [probs] + list(res)
-        if isinstance(self._auto_model, HybridBert):
+        if self.model_type == 'classification' or self.model_type == 'hybrid':
+            if calibrate:
+                labels = [example["label"] for example in eval_dataset]
+                calibr = calibrator.ModelWithTempScaling(self._auto_model)
+                calibr.scaling(
+                    torch.FloatTensor(logits),
+                    torch.LongTensor(labels),
+                    lr=1e-3,  # TODO:
+                    max_iter=100,  # TODO:
+                )
+                self.temperature = calibr.temperature.detach().numpy()[0]
+                self.temperature = np.clip(self.temperature, 0.1, 10)
+
+            logits = np.true_divide(logits, self.temperature)
+
+            if apply_softmax:
+                probs = F.softmax(torch.tensor(logits), dim=1).numpy()
+            else:
+                probs = logits
+
+        if self.model_type == 'hybrid':
             preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
-        else:
+            return [preds, probs] + list(res)
+        elif self.model_type == 'classification':
             preds = np.argmax(probs, axis=1)
-        return [preds, probs] + list(res)
-    
-    
+            return [preds, probs] + list(res)
+        elif self.model_type == 'regression':
+            preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
+            lnvar = pred_lnvar
+            return [preds, lnvar] + list(res)
+       
