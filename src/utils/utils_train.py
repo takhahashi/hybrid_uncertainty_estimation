@@ -165,4 +165,4 @@ class RegressionModelCallback(TrainerCallback):
         res = self.trainer.predict(self.eval_dataset)
         self.trainer.log({"lnvar_mean":np.mean(res[0][1])})
         # ここで評価時の処理をカスタマイズします
-        print(res)
+        #print(res)
