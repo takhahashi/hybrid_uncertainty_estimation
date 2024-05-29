@@ -41,20 +41,20 @@ def init_wandb(directory, config, wandb_disabled=False):
     group_name = f"{task}|{model_name}|{strat_name}|{date}"
     run_name = f"{run_name}"
     print('config:',config)
-    print()
     if 'deberta' in config.model.model_name_or_path:
         model_name = 'deberta'
     else:
         model_name = 'bert'
 
-    if "hybrid" == config.model.model_type:
-        inf_type = 'hybrid'
-    elif "regression" == config.model.model_type:
-        inf_type = 'regression'
-    elif "classification" == config.model.model_type:
-        inf_type = 'classification'
-    else:
-        raise ValueError(f"INVALID MODEL_TYPE: {config.model.model_type}")
+    if wandb_disabled:
+        if "hybrid" == config.model.model_type:
+            inf_type = 'hybrid'
+        elif "regression" == config.model.model_type:
+            inf_type = 'regression'
+        elif "classification" == config.model.model_type:
+            inf_type = 'classification'
+        else:
+            raise ValueError(f"INVALID MODEL_TYPE: {config.model.model_type}")
 
     if wandb_disabled:
         project_name=None
