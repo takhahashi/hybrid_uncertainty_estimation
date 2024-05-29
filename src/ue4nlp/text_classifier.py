@@ -9,6 +9,7 @@ from tqdm import trange
 import numpy as np
 import pickle
 import json
+import pdb
 import os
 
 from utils.classification_models import HybridBert
@@ -66,6 +67,7 @@ class TextClassifier:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset)
+        pdb.set_trace()
         if isinstance(self._auto_model, HybridBert):
             logits = res[0][0]
             reg_output = res[0][1]

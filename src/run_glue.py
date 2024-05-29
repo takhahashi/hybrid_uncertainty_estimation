@@ -211,6 +211,7 @@ def do_predict_eval(
     eval_results["true_labels"] = true_labels
 
     selectivenet = config.ue.reg_type == "selectivenet"
+    
     cls = TextClassifier(
         model,
         tokenizer,
@@ -231,6 +232,8 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
+    
+        #if 
         preds, probs = res[:2]
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
