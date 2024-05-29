@@ -1024,7 +1024,7 @@ class BertForSequenceRegression(BertPreTrainedModel):
 
         self.bert = BertModel(config)
         regressor_dropout = (
-            config.regressor_dropout if config.regressor_dropout is not None else config.hidden_dropout_prob
+            config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
         )
         self.dropout = nn.Dropout(regressor_dropout)
         self.score_predictor = nn.Linear(config.hidden_size, 1)
