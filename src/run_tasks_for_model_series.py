@@ -11,6 +11,7 @@ from collections.abc import Iterable
 import utils.utils_tasks as utils
 
 import logging
+import pdb
 
 log = logging.getLogger(__name__)
 
@@ -99,6 +100,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.score_id={score_id}"
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
+            pdb.set_trace()
         else:
             args_str += " "
             args_str += f"seed={seed}"
