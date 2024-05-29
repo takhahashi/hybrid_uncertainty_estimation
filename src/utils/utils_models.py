@@ -55,6 +55,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         if fairlib_args is None
         else fairlib_args.model_name
     )
+    """    
     if 'hybridbert' == base_model_name:
         if data_args.task_name == 'riken':
             model_config_name = 'tohoku-nlp/bert-base-japanese-v3'
@@ -66,7 +67,8 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         else:
             model_config_name = 'microsoft/debert-v3-base'
     else:
-        model_config_name = base_model_name
+    """
+    model_config_name = base_model_name
 
     model_config = AutoConfig.from_pretrained(
         model_config_name,
@@ -89,6 +91,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         tokenizer.__call__ = lambda instances, *args: instances
         tokenizer._call_one = lambda text, text_pair, *args, **kwargs: text
     else:
+        """
         if 'hybridbert' == base_model_name:
             if data_args.task_name == 'riken':
                 model_tokenizer_name = 'tohoku-nlp/bert-base-japanese-v3'
@@ -100,7 +103,8 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
             else:
                 model_tokenizer_name = 'microsoft/debert-v3-base'
         else:
-            model_tokenizer_name = base_model_name
+        """
+        model_tokenizer_name = base_model_name
         tokenizer = AutoTokenizer.from_pretrained(
             model_tokenizer_name,
             cache_dir=config.cache_dir,
@@ -111,10 +115,10 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
     use_spectralnorm = "use_spectralnorm" in ue_args.keys() and ue_args.use_spectralnorm
     use_mixup = "mixup" in config.keys() and config.mixup.use_mixup
     use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
-    model_path_or_name = model_args.model_name_or_path
+    #model_path_or_name = model_args.model_name_or_path
 
     models_constructors = {
-        "hybridbert": create_hybridbert,
+        #"hybridbert": create_hybridbert,
         "fairlib_bert": create_fairlib_bert,
         "fairlib_mlp": create_fairlib_mlp,
         "fairlib_fixed": create_fairlib_mlp,
@@ -127,7 +131,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         "bert": create_bert,
     }
     for key, value in models_constructors.items():
-        if key in model_path_or_name:
+        if key in base_model_name:
             return (
                 models_constructors[key](
                     model_config,
