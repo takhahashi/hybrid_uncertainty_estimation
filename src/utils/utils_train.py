@@ -154,15 +154,3 @@ class HybridModelCallback(TrainerCallback):
             scaled_loss = self.hb_model.diff_weights[k].to('cpu').detach().numpy().copy() * self.hb_model.scale_weights[k].to('cpu').detach().numpy().copy() * v[-1]
             each_task_loss = v[-1]
             self.trainer.log({f"{k}_scaled_loss": scaled_loss, f"{k}_loss":each_task_loss})
-
-class RegressionModelCallback(TrainerCallback):
-    def __init__(self, regressor, trainer, eval_dataset):
-        super().__init__()
-        self.regressor = regressor
-        self.trainer = trainer
-        self.eval_dataset = eval_dataset
-    def on_epoch_end(self, args, state, control, **kwargs):
-        res = self.trainer.predict(self.eval_dataset)
-        self.trainer.log({"lnvar_mean":np.mean(res[0][1])})
-        # ここで評価時の処理をカスタマイズします
-        #print(res)

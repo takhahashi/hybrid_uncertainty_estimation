@@ -1072,6 +1072,7 @@ class BertForSequenceRegression(BertPreTrainedModel):
         pooled_output = self.dropout(pooled_output)
         pred_score = self.sigmoid(self.score_predictor(pooled_output))
         pred_lnvar = self.variance_predictor(pooled_output)
+        print(torch.mean(pred_lnvar))
 
         loss = None
         if labels is not None:

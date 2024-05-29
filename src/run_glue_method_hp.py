@@ -493,7 +493,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     )
     if model_args.model_name_or_path == 'hybridbert':
         trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
-    trainer.add_callback(RegressionModelCallback(regressor=model, trainer=trainer, eval_dataset=eval_dataset)) 
+    
     if config.do_train:
         trainer.train(
             model_path=model_args.model_name_or_path
