@@ -46,7 +46,7 @@ def init_wandb(directory, config, wandb_disabled=False):
     else:
         model_name = 'bert'
 
-    if wandb_disabled:
+    if not wandb_disabled:
         if "hybrid" == config.model.model_type:
             inf_type = 'hybrid'
         elif "regression" == config.model.model_type:
