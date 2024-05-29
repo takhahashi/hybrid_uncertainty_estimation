@@ -161,7 +161,7 @@ class RegressionModelCallback(TrainerCallback):
         self.regressor = regressor
         self.trainer = trainer
         self.eval_dataset = eval_dataset
-    def on_evaluate(self, args, state, control, **kwargs):
-        ans = self.trainer.predict(self.eval_dataset)
-        pred_lnvar = ans[0][1]
-        self.trainer.log({f"eval_mean_lnvar":np.mean(pred_lnvar)})
+    def on_evaluate(self, args: TrainingArguments, state, control, model, eval_dataloader, epoch: int, steps: int, eval_pred: EvalPrediction, **kwargs):
+        # ここで評価時の処理をカスタマイズします
+        model_output = eval_pred.predictions
+        self.log_metrics(model_output, epoch)
