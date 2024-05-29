@@ -160,7 +160,7 @@ class RegressionModelCallback(TrainerCallback):
         super().__init__()
         self.regressor = regressor
         self.trainer = trainer
-        self.eval_dateset = eval_dataset
+        self.eval_dataset = eval_dataset
     def on_evaluate(self, args, state, control, **kwargs):
         ans = self.trainer.predict(self.eval_dataset)
         pred_lnvar = ans[0][1]
