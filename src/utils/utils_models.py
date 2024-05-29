@@ -142,13 +142,12 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
                     use_mixup,
                     use_selective,
                     ue_args,
-                    model_path_or_name,
+                    base_model_name,
                     config,
                 ),
                 tokenizer,
             )
-    raise ValueError(f"Cannot find model with this name or path: {model_path_or_name}")
-
+    raise ValueError(f"Cannot find model with this name or path: {base_model_name}")
 
 def create_model_ner(num_labels, model_args, data_args, ue_args, config):
     model_config = AutoConfig.from_pretrained(

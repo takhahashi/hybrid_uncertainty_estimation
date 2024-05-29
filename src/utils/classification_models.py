@@ -150,7 +150,7 @@ def create_bert(
         cache_dir=config.cache_dir,
     )
     if ue_args.use_cache:
-        raise AssertionError
+        raise ValueError("DO NOT USE USE_CACHE")
         if use_sngp:
             model_kwargs.update(dict(ue_config=ue_args.sngp))
             model = build_model(
@@ -189,15 +189,23 @@ def create_bert(
             log.info("Replaced BERT Pooler with SN")
             if config.do_eval and not (config.do_train):
                 load_bert_sn_pooler(model_path_or_name, model)
-        elif model_config.hybrid:
+        elif config.model.model_type == 'hybrid':
             model = build_model(
-                HybridBert, model_path_or_name, **model_kwargs
+                HybridBert, model_config._name_or_path, ue_args.reg_type, **model_kwargs
             )
-
-        else:
+            log.info("loaded HybridBERT constraction")
+        elif config.model.model_type == 'regression':
+            model = build_model(
+                BertForSequenceRegression, model_path_or_name, **model_kwargs
+            )
+            log.info("loaded RegressionBERT constraction")
+        elif config.model.model_type == 'classification':
             model = build_model(
                 AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
             )
+            log.info("loaded ClassificationBERT constraction")
+        else:
+            raise ValueError(f"{config.model.model_type} IS INVALID MODEL_TYPE")
     return model
 
 
@@ -793,7 +801,7 @@ def create_xlnet(
             AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
         )
     return model
-
+"""
 def create_hybridbert(
     model_config,
     tokenizer,
@@ -815,7 +823,7 @@ def create_hybridbert(
         HybridBert, model_config._name_or_path, ue_args.reg_type, **model_kwargs
     )
     return model
-
+"""
 @dataclass
 class HybridOutput(SequenceClassifierOutput):
     loss: Optional[torch.FloatTensor] = None
