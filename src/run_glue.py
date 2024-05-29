@@ -668,7 +668,7 @@ def main(config):
         filename = "pytorch_model.bin"
     else:
         filename = "dev_inference.json"
-
+    config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
         train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
     else:
