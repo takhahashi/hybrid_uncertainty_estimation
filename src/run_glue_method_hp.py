@@ -18,7 +18,7 @@ import pdb
 
 from utils.utils_wandb import init_wandb, wandb
 
-from ue4nlp.text_classifier import TextClassifier
+from ue4nlp.text_classifier import TextPredictor
 
 from transformers import (
     AutoConfig,
