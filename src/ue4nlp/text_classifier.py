@@ -72,6 +72,7 @@ class TextPredictor:
         if self.model_type == 'regression':
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
+            pdb.set_trace()
         elif self.model_type == 'hybrid':
             logits = res[0][0]
             reg_output = res[0][1]
