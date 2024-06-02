@@ -19,6 +19,7 @@ from ue4nlp.mahalanobis_distance import (
 )
 
 import logging
+import pdb
 import copy
 
 log = logging.getLogger()
@@ -88,6 +89,7 @@ class UeEstimatorMahalanobis:
         log.info("**************Done.**********************")
 
     def _fit_covariance(self, X, y, class_cond=True):
+        pdb.set_trace()
         if class_cond:
             return compute_covariance(self.class_cond_centroids, X, y, class_cond)
         return compute_covariance(self.train_centroid, X, y, class_cond)
