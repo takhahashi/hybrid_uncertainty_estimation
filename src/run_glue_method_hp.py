@@ -491,7 +491,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         data_collator = data_collator,
         callbacks=callbacks,
     )
-    if model_args.model_name_or_path == 'hybridbert':
+    if model_args.model_type == 'hybrid':
         trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
     
     if config.do_train:

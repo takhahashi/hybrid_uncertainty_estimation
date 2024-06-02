@@ -453,7 +453,7 @@ class SelectiveTrainer(Trainer):
         labels = inputs["labels"]
         output_hidden_states = True if self.reg_type == "metric" or self.reg_type == "u_aware_metric" else False
         outputs = model(**inputs, output_hidden_states=output_hidden_states)
-        hybridbert = isinstance(outputs, HybridOutput)
+        hybrid = isinstance(outputs, HybridOutput)
 
         if self.reg_type == "selectivenet":
             logits = outputs.logits[:, : model.config.num_labels]
@@ -474,7 +474,7 @@ class SelectiveTrainer(Trainer):
                 logits_outputs = logits
             if self.reg_type == "u_aware_metric":
                 softmax_probabilities = F.softmax(logits_outputs, dim=-1)
-                if hybridbert:
+                if hybrid:
                     reg_output = outputs.reg_output
                     reg_pred_int = np.round((model.config.num_labels - 1) * reg_output.to('cpu').detach().view(-1).numpy().copy())
                     probabilities = softmax_probabilities[list(range(len(softmax_probabilities))), reg_pred_int]
@@ -487,7 +487,7 @@ class SelectiveTrainer(Trainer):
             loss_fct = MSELoss()
             loss = loss_fct(logits.view(-1), labels.view(-1))
         else:
-            if hybridbert:
+            if hybrid:
                 loss = outputs.loss
             else:
                 loss_fct = CrossEntropyLoss()
