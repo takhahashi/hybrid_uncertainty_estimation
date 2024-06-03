@@ -95,20 +95,18 @@ class UeEstimatorTrustscore:
     
     def _diffclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
         min_dist = None
-        for k, v in train_hiddens_labels.items():
-            if int(k) != int(test_answer):
-                for train_hidden_state in train_hiddens_labels[int(test_answer)]:
-                    dist = np.linalg.norm(test_hidden_state-train_hidden_state)
-                    if(min_dist is None or dist < min_dist):
-                        min_dist = dist
+        for train_label, train_hidden_state in train_hiddens_labels.items():
+            if int(train_label) != int(test_answer):
+                dist = np.linalg.norm(test_hidden_state-train_hidden_state)
+                if(min_dist is None or dist < min_dist):
+                    min_dist = dist
         return min_dist
     
     def _sameclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
         min_dist = None
-        for k, v in train_hiddens_labels.items():
-            if int(k) == int(test_answer):
-                for train_hidden_state in train_hiddens_labels[int(test_answer)]:
-                    dist = np.linalg.norm(test_hidden_state-train_hidden_state)
-                    if(min_dist is None or dist < min_dist):
-                        min_dist = dist
+        for train_label, train_hidden_state in train_hiddens_labels.items():
+            if int(train_label) == int(test_answer):
+                dist = np.linalg.norm(test_hidden_state-train_hidden_state)
+                if(min_dist is None or dist < min_dist):
+                    min_dist = dist
         return min_dist
