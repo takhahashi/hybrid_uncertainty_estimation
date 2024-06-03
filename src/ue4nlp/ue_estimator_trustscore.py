@@ -48,7 +48,7 @@ class UeEstimatorTrustscore:
             else:
                 trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
                 eval_results["trust_score"].append(float(trust_score))
-        pdb.set_trace()
+
         return eval_results
 
     def fit_ue(self, X=None, y=None, X_test=None):
@@ -98,6 +98,7 @@ class UeEstimatorTrustscore:
         for train_label, train_hidden_state in train_hiddens_labels.items():
             if int(train_label) != int(test_answer):
                 dist = np.linalg.norm(test_hidden_state-train_hidden_state)
+                pdb.set_trace()
                 if(min_dist is None or dist < min_dist):
                     min_dist = dist
         return min_dist
