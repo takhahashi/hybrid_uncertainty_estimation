@@ -233,7 +233,6 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
-        pdb.set_trace()
     
         if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
             preds, probs = res[:2]
