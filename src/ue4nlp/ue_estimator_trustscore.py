@@ -48,6 +48,8 @@ class UeEstimatorTrustscore:
             else:
                 trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
                 eval_results["trust_score"].append(float(trust_score))
+            
+            pdb.set_trace()
 
         return eval_results
 
@@ -92,7 +94,6 @@ class UeEstimatorTrustscore:
             
         hidden_states = np.concatenate(hidden_states)
         answers = np.concatenate(answers)
-        pdb.set_trace()
         return hidden_states, answers
     
     def _diffclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
