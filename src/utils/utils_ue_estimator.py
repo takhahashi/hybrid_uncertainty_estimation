@@ -2,6 +2,7 @@ from ue4nlp.ue_estimator_mahalanobis import UeEstimatorMahalanobis
 from ue4nlp.ue_estimator_rde import UeEstimatorRDE
 from ue4nlp.ue_estimator_hybrid import UeEstimatorHybrid
 from ue4nlp.ue_estimator_ddu import UeEstimatorDDU
+from ue4nlp.ue_estimator_trustscore import UeEstimatorTrustscore
 import numpy as np
 
 import logging
@@ -26,5 +27,7 @@ def create_ue_estimator(
         return UeEstimatorHybrid(model, ue_args, config, train_dataset)
     elif ue_args.ue_type == "ddu":
         return UeEstimatorDDU(model, ue_args, config, train_dataset)
+    elif ue_args.ue_type == "trust":
+        return UeEstimatorTrustscore(model, ue_args, config, train_dataset)
     else:
         raise ValueError()
