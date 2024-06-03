@@ -84,14 +84,10 @@ class UeEstimatorTrustscore:
         answers = []
         for step, inputs in enumerate(test_dataloader):
             outputs = model(**inputs, output_hidden_states=True)
-            pooled_output = outputs[1]
-            pooled_output = model.dropout(pooled_output)
-            pdb.set_trace()
-            logits = model.classifier(pooled_output).tp('cpu').detach().numpy().copy()
             
 
             hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
-            answers.append(np.argmax(logits, axis=-1))
+            answers.append(np.argmax(outputs.logits.to('cpu').detach().numpy().copy(), axis=-1))
         hidden_states = np.concatenate(hidden_states)
         answers = np.concatenate(answers)
         return hidden_states, answers
