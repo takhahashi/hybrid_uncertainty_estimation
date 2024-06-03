@@ -49,7 +49,6 @@ class UeEstimatorTrustscore:
                 trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
                 eval_results["trust_score"].append(float(trust_score))
             
-            pdb.set_trace()
 
         return eval_results
 
