@@ -92,7 +92,7 @@ class UeEstimatorTrustscore:
         answers = np.concatenate(answers)
         return hidden_states, answers
     
-    def _diffclass_euclid_dist(test_hidden_state, test_answer, train_hiddens_labels):
+    def _diffclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
         min_dist = None
         for k, v in train_hiddens_labels.items():
             if int(k) != int(test_answer):
@@ -102,7 +102,7 @@ class UeEstimatorTrustscore:
                         min_dist = dist
         return min_dist
     
-    def _sameclass_euclid_dist(test_hidden_state, test_answer, train_hiddens_labels):
+    def _sameclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
         min_dist = None
         for k, v in train_hiddens_labels.items():
             if int(k) == int(test_answer):
