@@ -801,29 +801,7 @@ def create_xlnet(
             AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
         )
     return model
-"""
-def create_hybridbert(
-    model_config,
-    tokenizer,
-    use_sngp,
-    use_duq,
-    use_spectralnorm,
-    use_mixup,
-    use_selective,
-    ue_args,
-    model_path_or_name,
-    config,
-):
-    model_kwargs = dict(
-        from_tf=False,
-        config=model_config,
-        cache_dir=config.cache_dir,
-    )
-    model = build_model(
-        HybridBert, model_config._name_or_path, ue_args.reg_type, **model_kwargs
-    )
-    return model
-"""
+
 @dataclass
 class HybridOutput(SequenceClassifierOutput):
     loss: Optional[torch.FloatTensor] = None
