@@ -61,17 +61,8 @@ class UeEstimatorTrustscore:
         for label, hidden_state in zip(labels, hidden_states):
             labels_hidden_states[int(label)].append(hidden_state)
         self.train_hidden_states = labels_hidden_states
-        pdb.set_trace()
         log.info("**************Done.**********************")
 
-    def _fit_covariance(self, X, y, class_cond=True):
-        pdb.set_trace()
-        if class_cond:
-            return compute_covariance(self.class_cond_centroids, X, y, class_cond)
-        return compute_covariance(self.train_centroid, X, y, class_cond)
-
-    def _fit_centroids(self, X, y, class_cond=True):
-        return compute_centroids(X, y, class_cond)
 
     def _replace_model_head(self):
         log.info("Change classifier to Identity Pooler")
