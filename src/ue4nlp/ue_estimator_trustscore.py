@@ -89,9 +89,10 @@ class UeEstimatorTrustscore:
 
             hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
             answers.append(np.argmax(outputs.logits.to('cpu').detach().numpy().copy(), axis=-1))
-            pdb.set_trace()
+            
         hidden_states = np.concatenate(hidden_states)
         answers = np.concatenate(answers)
+        pdb.set_trace()
         return hidden_states, answers
     
     def _diffclass_euclid_dist(self, test_hidden_state, test_answer, train_hiddens_labels):
