@@ -44,10 +44,10 @@ class UeEstimatorTrustscore:
             diffclass_dist = self._diffclass_euclid_dist(hidden_state, int(answer), self.train_hidden_states)
             sameclass_dist= self._sameclass_euclid_dist(hidden_state, int(answer), self.train_hidden_states)
             if sameclass_dist is None:
-                eval_results["trust_score"].append(0.)
+                eval_results["trust_score"].append(float(0.))
             else:
                 trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
-                eval_results["trust_score"].append(trust_score)
+                eval_results["trust_score"].append(float(trust_score))
         return eval_results
 
     def fit_ue(self, X=None, y=None, X_test=None):
