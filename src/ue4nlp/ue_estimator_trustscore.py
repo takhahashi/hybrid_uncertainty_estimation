@@ -48,8 +48,6 @@ class UeEstimatorTrustscore:
             else:
                 trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
                 eval_results["trust_score"].append(float(trust_score))
-            
-
         return eval_results
 
     def fit_ue(self, X=None, y=None, X_test=None):
