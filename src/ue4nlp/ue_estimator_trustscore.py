@@ -36,15 +36,16 @@ class UeEstimatorTrustscore:
         return self._predict_with_fitted_cov(X, y)
 
     def fit_ue(self, X, y=None, X_test=None):
-        trainer_cls = self.cls
+        cls = self.cls
         model = self.cls._auto_model
+        trainer = self.cls._trainer
         model.eval()
         
 
         log.info(
             "****************Start calcurating hiddenstate on train dataset **************"
         )
-        train_dataloader = trainer_cls.get_train_dataloader(X)
+        train_dataloader = trainer.get_train_dataloader(X)
 
         for step, inputs in enumerate(train_dataloader):
             outputs = model(**inputs, output_hidden_states=True)
