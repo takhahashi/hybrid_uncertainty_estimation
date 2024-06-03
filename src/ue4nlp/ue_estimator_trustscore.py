@@ -39,8 +39,7 @@ class UeEstimatorTrustscore:
         trainer_cls = self.cls
         model = self.cls._auto_model
         model.eval()
-        outputs = model(**inputs, output_hidden_states=True)
-        pdb.set_trace()
+        
 
         log.info(
             "****************Start calcurating hiddenstate on train dataset **************"
@@ -48,6 +47,8 @@ class UeEstimatorTrustscore:
         train_dataloader = trainer_cls.get_train_dataloader(X)
 
         for step, inputs in enumerate(train_dataloader):
+            outputs = model(**inputs, output_hidden_states=True)
+            pdb.set_trace()
 
 
 
