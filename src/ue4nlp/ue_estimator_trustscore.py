@@ -86,7 +86,9 @@ class UeEstimatorTrustscore:
             outputs = model(**inputs, output_hidden_states=True)
             pooled_output = outputs[1]
             pooled_output = model.dropout(pooled_output)
+            pdb.set_trace()
             logits = model.classifier(pooled_output).tp('cpu').detach().numpy().copy()
+            
 
             hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
             answers.append(np.argmax(logits, axis=-1))
