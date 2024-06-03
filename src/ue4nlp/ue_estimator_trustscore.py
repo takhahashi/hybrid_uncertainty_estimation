@@ -36,23 +36,22 @@ class UeEstimatorTrustscore:
         return self._predict_with_fitted_cov(X, y)
 
     def fit_ue(self, X, y=None, X_test=None):
-        cls = self.cls
+        trainer_cls = self.cls
         model = self.cls._auto_model
-        self.use_pca = "use_pca" in self.ue_args.keys() and self.ue_args.use_pca
-        self.use_tanh = "use_tanh" in self.ue_args.keys() and self.ue_args.use_tanh
-        self.use_encoder_feats = (
-            "use_encoder_feats" in self.ue_args.keys()
-            and self.ue_args.use_encoder_feats
-        )
-        self.return_train_preds = (
-            "return_train_preds" in self.ue_args.keys()
-            and self.ue_args.return_train_preds
-        )
+        model.eval()
+        outputs = model(**inputs, output_hidden_states=True)
+        pdb.set_trace()
 
         log.info(
-            "****************Start fitting covariance and centroids **************"
+            "****************Start calcurating hiddenstate on train dataset **************"
         )
+        train_dataloader = trainer_cls.get_train_dataloader(X)
 
+        for step, inputs in enumerate(train_dataloader):
+
+
+
+            loss, logits, labels = self.prediction_step(model, inputs, prediction_loss_only, ignore_keys=ignore_keys)
         if y is None:
             y = self._exctract_labels(X)
 
@@ -62,17 +61,9 @@ class UeEstimatorTrustscore:
         self._replace_model_head()
         X_features = self._exctract_features(X)
 
-        if self.use_pca:
-            self.pca = KernelPCA(n_components=256, kernel="rbf")
-            X_features = self.pca.fit_transform(X_features)
-
         self.class_cond_centroids = self._fit_centroids(X_features, y)
         self.class_cond_covariance = self._fit_covariance(X_features, y)
 
-        self.fit_all_md_versions = (
-            "fit_all_md_versions" in self.ue_args.keys()
-            and self.ue_args.fit_all_md_versions
-        )
         self.return_features = (
             "return_features" in self.ue_args.keys() and self.ue_args.return_features
         )
