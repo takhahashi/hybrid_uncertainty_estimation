@@ -54,12 +54,12 @@ class UeEstimatorTrustscore:
         for step, inputs in enumerate(train_dataloader):
             outputs = model(**inputs, output_hidden_states=True)
             hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
-            labels.append(int(inputs["labels"].to('cpu').detach().numpy().copy()))
+            labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
         hidden_states = np.concatenate(hidden_states)
         labels = np.concatenate(labels)
         labels_hidden_states = defaultdict(list)
         for label, hidden_state in zip(labels, hidden_states):
-            labels_hidden_states[labels].append(hidden_state)
+            labels_hidden_states[int(label)].append(hidden_state)
         self.train_hidden_states = labels_hidden_states
         pdb.set_trace()
         log.info("**************Done.**********************")
