@@ -226,7 +226,7 @@ def do_predict_eval(
         if config.ue.calibrate:
             cls.predict(calibration_dataset, calibrate=True)
             log.info(f"Calibration temperature = {cls.temperature}")
-        """
+
 
         log.info("*** Evaluate ***")
 
@@ -256,7 +256,7 @@ def do_predict_eval(
             eval_results["eval_score"] = eval_score
             eval_results["lnvar"] = lnvar.tolist()
             eval_results["answers"] = preds.tolist()
-        """
+
 
     end_eval_time = time.time()
     log.info(f"Eval time {end_eval_time - start_eval_time}")
