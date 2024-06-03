@@ -89,6 +89,7 @@ class UeEstimatorTrustscore:
 
             hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
             answers.append(np.argmax(outputs.logits.to('cpu').detach().numpy().copy(), axis=-1))
+            pdb.set_trace()
         hidden_states = np.concatenate(hidden_states)
         answers = np.concatenate(answers)
         return hidden_states, answers
@@ -99,7 +100,6 @@ class UeEstimatorTrustscore:
             if int(train_label) != int(test_answer):
                 for train_hidden_state in train_hidden_states:
                     dist = np.linalg.norm(test_hidden_state-train_hidden_state)
-                    pdb.set_trace()
                     if(min_dist is None or dist < min_dist):
                         min_dist = dist
         return min_dist
