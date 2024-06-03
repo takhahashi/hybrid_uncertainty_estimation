@@ -45,6 +45,7 @@ class UeEstimatorTrustscore:
         log.info(
             "****************Start calcurating hiddenstate on train dataset **************"
         )
+        pdb.set_trace()
         train_dataloader = trainer.get_train_dataloader(X)
 
         for step, inputs in enumerate(train_dataloader):
