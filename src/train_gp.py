@@ -338,18 +338,18 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
         GPmodel = GPModel(train_x, train_y, likelihood)
-        training_iter = training_args.iter_num
+        epoch = training_args.epoch
         GPmodel.train()
         likelihood.train()
         GPmodel.covar_module.base_kernel.lengthscale = np.linalg.norm(train_x[0].numpy() - train_x[1].numpy().T) ** 2 / 2
 
         optimizer = torch.optim.Adam([
             {'params': GPmodel.parameters()},  # Includes GaussianLikelihood parameters
-        ], lr=training_args.lr)
+        ], lr=training_args.learning_rate)
 
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, GPmodel)
 
-        for i in range(training_iter):
+        for i in range(epoch):
             optimizer.zero_grad()
             output = GPmodel(train_x)
             loss = -mll(output, train_y)
