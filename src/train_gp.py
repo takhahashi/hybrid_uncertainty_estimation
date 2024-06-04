@@ -322,22 +322,22 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         compute_metrics=metric_fn,
         data_collator=data_collator,
     )
-    if config.do_train:
-        train_dataloader = trainer.get_train_dataloader()
-        hidden_states = []
-        labels = []    
-        trainer.model.eval()
-        for step, inputs in enumerate(train_dataloader):
-            outputs = trainer.model(**inputs, output_hidden_states=True)
-            hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
-            labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
-        hidden_states = np.concatenate(hidden_states)
-        labels = np.concatenate(labels)
-        train_x = torch.FloatTensor(hidden_states)
-        train_y = torch.FloatTensor(labels)
+    train_dataloader = trainer.get_train_dataloader()
+    hidden_states = []
+    labels = []    
+    trainer.model.eval()
+    for step, inputs in enumerate(train_dataloader):
+        outputs = trainer.model(**inputs, output_hidden_states=True)
+        hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
+        labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
+    hidden_states = np.concatenate(hidden_states)
+    labels = np.concatenate(labels)
+    train_x = torch.FloatTensor(hidden_states)
+    train_y = torch.FloatTensor(labels)
 
-        likelihood = gpytorch.likelihoods.GaussianLikelihood()
-        GPmodel = GPModel(train_x, train_y, likelihood)
+    likelihood = gpytorch.likelihoods.GaussianLikelihood()
+    GPmodel = GPModel(train_x, train_y, likelihood)
+    if config.do_train:
         epoch = training_args.num_train_epochs
         GPmodel.train()
         likelihood.train()
@@ -361,20 +361,29 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     #################### Predicting##########################
 
     if config.do_eval or config.do_ue_estimate:
-        do_predict_eval(
-            model,
-            tokenizer,
-            trainer,
-            eval_dataset,
-            train_dataset,
-            calibration_dataset,
-            metric,
-            config,
-            work_dir,
-            model_args.model_name_or_path,
-            metric_fn,
-            max_seq_length,
-        )
+        hidden_states, labels = [], []
+        trainer.model.eval()
+        test_dataloader = trainer.get_test_dataloader(test_dataset)
+        for step, inputs in enumerate(test_dataloader):
+            outputs = trainer.model(**inputs, output_hidden_states=True)
+            hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
+            labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
+        hidden_states = np.concatenate(hidden_states)
+        labels = np.concatenate(labels)
+        test_x = torch.FloatTensor(hidden_states)
+        test_y = torch.FloatTensor(labels)
+        
+        GPmodel.load_state_dict(torch.load(config.model.model_name_or_path))
+        likelihood.eval()
+        GPmodel.eval()    
+        predictions = GPmodel(test_x)
+        mean = predictions.mean.cpu().detach().numpy()
+        std = predictions.stddev.cpu().detach().numpy()
+
+        eval_results = {'labels':labels, 'score':mean, 'std':std}
+
+        with open(Path(work_dir) / "dev_inference.json", "w") as res:
+            json.dump(eval_results, res)
 
 
 def update_config(cfg_old, cfg_new):
