@@ -322,7 +322,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         compute_metrics=metric_fn,
         data_collator=data_collator,
     )
-    print(training_args)
     if config.do_train:
         train_dataloader = trainer.get_train_dataloader()
         hidden_states = []
@@ -404,6 +403,7 @@ def main(config):
     )
     args_train = update_config(args_train, config.training)
     print(config.training)
+    print(args_train)
 
     args_data = DataTrainingArguments(task_name=config.data.task_name)
     args_data = update_config(args_data, config.data)
