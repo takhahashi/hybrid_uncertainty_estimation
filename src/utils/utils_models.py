@@ -74,6 +74,7 @@ def create_model(num_labels, model_args, data_args, ue_args, config):
         num_labels=num_labels,
         finetuning_task=data_args.task_name,
         cache_dir=config.cache_dir,
+        model_type=model_args.model_type,
     )
 
     if (
