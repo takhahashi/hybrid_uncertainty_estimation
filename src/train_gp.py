@@ -12,11 +12,13 @@ import numpy as np
 from pathlib import Path
 import random
 import torch
+import gpytorch
 import hydra
 import pickle
 import pdb
 
 from utils.utils_wandb import init_wandb, wandb
+from utils.classification_models import GPModel
 
 from ue4nlp.text_classifier import TextPredictor
 
@@ -252,10 +254,7 @@ def do_predict_eval(
 
 def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     log.info(f"config:{config}")
-    ue_args = config.ue
     encoder_model_args = config.encoder_model
-
-    log.info(f"Seed: {config.seed}")
 
     ############### Loading dataset ######################
 
@@ -263,12 +262,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     datasets = load_data(config)
     log.info("Done with loading the dataset.")
 
-    # Labels
-    if data_args.task_name in glue_datasets:
-        label_list = datasets["train"].features["label"].names
-    else:
-        label_list = datasets["train"].unique("label")
-        label_list.sort()  # Let's sort it for determinism
 
     if config.data.task_name == 'asap':
         low, high = get_score_range(config.data.task_name, config.data.prompt_id)
@@ -277,13 +270,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         high = upper_score_dic[config.data.prompt_id][config.data.score_id]
         low = 0
         num_labels = high - low + 1
-    else:
-        num_labels = len(label_list)
     log.info(f"Number of labels: {num_labels}")
 
     ################ Loading model #######################
 
-    encoder_model, tokenizer = create_model(num_labels, encoder_model_args, data_args, ue_args, config)
+    encoder_model, tokenizer = create_model(num_labels, encoder_model_args, data_args, config.ue, config)
 
     ################ Preprocessing the dataset ###########
 
@@ -297,29 +288,9 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     
 
     label_to_id = None
-    if (
-        model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id
-        and data_args.task_name is not None
-    ):
-        # Some have all caps in their config, some don't.
-        label_name_to_id = {k.lower(): v for k, v in model.config.label2id.items()}
-        if list(sorted(label_name_to_id.keys())) == list(sorted(label_list)):
-            label_to_id = {
-                i: int(label_name_to_id[label_list[i]]) for i in range(num_labels)
-            }
-        else:
-            log.warning(
-                "Your model seems to have been trained with labels, but they don't match the dataset: ",
-                f"model labels: {list(sorted(label_name_to_id.keys()))}, dataset labels: {list(sorted(label_list))}."
-                "\nIgnoring the model labels as a result.",
-            )
-    elif data_args.task_name is None:
-        label_to_id = {v: i for i, v in enumerate(label_list)}
-
     f_preprocess = lambda examples: preprocess_function(
         label_to_id, sentence1_key, sentence2_key, tokenizer, max_seq_length, examples
     )
-
     datasets = datasets.map(
         f_preprocess,
         batched=True,
@@ -332,20 +303,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     train_dataset = datasets["train"]
     calibration_dataset = None
     eval_dataset = datasets["validation"]
+    test_dataset = datasets["test"]
 
-    if data_args.task_name in glue_datasets:
-        metric = load_metric(
-            "glue", data_args.task_name, keep_in_memory=True, cache_dir=config.cache_dir
-        )
-    else:
-        metric = load_metric(
-            "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
-        )
-    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
-        eval_dataset = datasets["validation"]
-        test_dataset = (
-            datasets["test"] if config.do_eval or config.do_ue_estimate else None
-        )
+    metric = load_metric(
+        "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
+    )
     is_regression = False
     metric_fn = lambda p: compute_metrics(is_regression, metric, num_labels, p)
 
@@ -365,46 +327,51 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     data_collator = simple_collate_fn
     training_args = update_config(training_args, {'fp16':True})
     
-    use_sngp = ue_args.ue_type == "sngp"
-    use_selective = "use_selective" in ue_args.keys() and ue_args.use_selective
-    
-    training_args = update_config(training_args, {'load_best_model_at_end':True})
-    training_args = update_config(training_args, {'eval_strategy':'epoch'})
-    training_args = update_config(training_args, {'metric_for_best_model':'eval_loss'})
-    training_args = update_config(training_args, {'save_strategy':'epoch'})
-    if "patience" in config.training.keys():
-        earlystopping = EarlyStoppingCallback(early_stopping_patience=int(config.training.patience))
-        callbacks = [earlystopping]
-    else:
-        callbacks = None
-    #################### Training ##########################
-    trainer = get_trainer(
-        "cls",
-        use_selective,
-        use_sngp,
-        model,
-        training_args,
-        train_dataset,
-        eval_dataset,
-        metric_fn,
-        data_collator = data_collator,
-        callbacks=callbacks,
+
+    training_args.save_total_limit = 1
+    trainer = Trainer(
+        model=encoder_model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        compute_metrics=metric_fn,
+        data_collator=data_collator,
     )
-    if model_args.model_type == 'hybrid':
-        trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
-    
     if config.do_train:
-        trainer.train(
-            model_path=model_args.model_name_or_path
-            if os.path.isdir(model_args.model_name_or_path)
-            else None
-        )
-        # Rewrite the optimal hyperparam data if we want the evaluation metrics of the final trainer
-        if config.do_eval:
-            evaluation_metrics = trainer.evaluate()
-        if work_dir != None:
-            trainer.save_model(work_dir)
-            tokenizer.save_pretrained(work_dir)
+        train_dataloader = trainer.get_train_dataloader()
+        hidden_states = []
+        labels = []    
+        trainer.model.eval()
+        for step, inputs in enumerate(train_dataloader):
+            outputs = trainer.model(**inputs, output_hidden_states=True)
+            hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
+            labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
+        hidden_states = np.concatenate(hidden_states)
+        labels = np.concatenate(labels)
+        train_x = torch.FloatTensor(hidden_states)
+        train_y = torch.FloatTensor(labels)
+
+        likelihood = gpytorch.likelihoods.GaussianLikelihood()
+        GPmodel = GPModel(train_x, train_y, likelihood)
+        training_iter = training_args.training.iter_num
+        GPmodel.train()
+        likelihood.train()
+        GPmodel.covar_module.base_kernel.lengthscale = np.linalg.norm(train_x[0].numpy() - train_x[1].numpy().T) ** 2 / 2
+
+        optimizer = torch.optim.Adam([
+            {'params': GPmodel.parameters()},  # Includes GaussianLikelihood parameters
+        ], lr=training_args.lr)
+
+        mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, GPmodel)
+
+        for i in range(training_iter):
+            optimizer.zero_grad()
+            output = GPmodel(train_x)
+            loss = -mll(output, train_y)
+            loss.backward()
+            optimizer.step()
+
+        torch.save(GPmodel.state_dict(), training_args.auto_generated_dir)
 
     #################### Predicting##########################
 

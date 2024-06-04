@@ -50,6 +50,7 @@ from collections import defaultdict
 import numpy as np
 from torch.nn.utils import spectral_norm
 import torch
+import gpytorch
 from scipy import stats
 import logging
 import os
@@ -189,23 +190,23 @@ def create_bert(
             log.info("Replaced BERT Pooler with SN")
             if config.do_eval and not (config.do_train):
                 load_bert_sn_pooler(model_path_or_name, model)
-        elif config.model.model_type == 'hybrid':
+        elif model_config.model_type == 'hybrid':
             model = build_model(
                 HybridBert, model_config._name_or_path, ue_args.reg_type, **model_kwargs
             )
             log.info("loaded HybridBERT constraction")
-        elif config.model.model_type == 'regression':
+        elif model_config.model_type == 'regression':
             model = build_model(
                 BertForSequenceRegression, model_path_or_name, **model_kwargs
             )
             log.info("loaded RegressionBERT constraction")
-        elif config.model.model_type == 'classification':
+        elif model_config.model_type == 'classification':
             model = build_model(
                 AutoModelForSequenceClassification, model_path_or_name, **model_kwargs
             )
             log.info("loaded ClassificationBERT constraction")
         else:
-            raise ValueError(f"{config.model.model_type} IS INVALID MODEL_TYPE")
+            raise ValueError(f"{model_config.model_type} IS INVALID MODEL_TYPE")
     return model
 
 
@@ -1072,3 +1073,13 @@ class BertForSequenceRegression(BertPreTrainedModel):
         loss = torch.exp(-pred_lnvar)*torch.pow(labels - pred_score, 2)/2 + pred_lnvar/2
         loss = torch.sum(loss)
         return loss
+    
+class GPModel(gpytorch.models.ExactGP):
+    def __init__(self, train_x, train_y, likelihood, lengthscale=None):
+        super(GPModel, self).__init__(train_x, train_y, likelihood)
+        self.mean_module = gpytorch.means.ConstantMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel(lengthscale_prior=lengthscale))
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
