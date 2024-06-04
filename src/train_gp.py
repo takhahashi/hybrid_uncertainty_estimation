@@ -356,7 +356,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
             loss.backward()
             optimizer.step()
 
-        torch.save(GPmodel.state_dict(), work_dir)
+        torch.save(GPmodel.state_dict(), work_dir + '/model')
 
     #################### Predicting##########################
 
