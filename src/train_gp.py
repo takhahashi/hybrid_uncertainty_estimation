@@ -353,7 +353,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
         GPmodel = GPModel(train_x, train_y, likelihood)
-        training_iter = training_args.training.iter_num
+        training_iter = training_args.iter_num
         GPmodel.train()
         likelihood.train()
         GPmodel.covar_module.base_kernel.lengthscale = np.linalg.norm(train_x[0].numpy() - train_x[1].numpy().T) ** 2 / 2
