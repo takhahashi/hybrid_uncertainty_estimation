@@ -417,6 +417,7 @@ def main(config):
         output_dir=auto_generated_dir,
     )
     args_train = update_config(args_train, config.training)
+    print(config.training)
 
     args_data = DataTrainingArguments(task_name=config.data.task_name)
     args_data = update_config(args_data, config.data)
