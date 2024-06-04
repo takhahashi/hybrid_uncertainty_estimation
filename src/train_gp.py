@@ -311,23 +311,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     is_regression = False
     metric_fn = lambda p: compute_metrics(is_regression, metric, num_labels, p)
 
-    if config.do_train:
-        """
-        training_args.warmup_steps = int(
-            training_args.warmup_ratio  # TODO:
-            * len(train_dataset)
-            * training_args.num_train_epochs
-            / training_args.train_batch_size
-        )
-        log.info(f"Warmup steps: {training_args.warmup_steps}")
-        training_args.logging_steps = training_args.warmup_steps
-        """
-        training_args.weight_decay_rate = training_args.weight_decay
-
     data_collator = simple_collate_fn
     training_args = update_config(training_args, {'fp16':True})
-    
-
     training_args.save_total_limit = 1
     trainer = Trainer(
         model=encoder_model,
@@ -337,6 +322,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         compute_metrics=metric_fn,
         data_collator=data_collator,
     )
+    print(training_args)
     if config.do_train:
         train_dataloader = trainer.get_train_dataloader()
         hidden_states = []
