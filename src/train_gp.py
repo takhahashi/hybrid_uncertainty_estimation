@@ -412,8 +412,7 @@ def main(config):
     log.info(f"Work dir: {auto_generated_dir}")
     os.chdir(hydra.utils.get_original_cwd())
 
-    init_wandb(auto_generated_dir, config)
-
+    os.environ["WANDB_DISABLED"] = "true"
     args_train = TrainingArgsWithLossCoefs(
         output_dir=auto_generated_dir,
     )
@@ -424,7 +423,6 @@ def main(config):
 
 
     train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
-    wandb.finish()
 
 
 if __name__ == "__main__":
