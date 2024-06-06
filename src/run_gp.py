@@ -386,7 +386,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         mean = predictions.mean.cpu().detach().numpy()
         std = predictions.stddev.cpu().detach().numpy()
 
-        eval_results = {'labels':list(float(labels)), 'score':list(mean), 'std':list(std)}
+        eval_results = {'labels':list((labels).astype('float64')), 'score':list(mean), 'std':list(std)}
 
         with open(Path(work_dir) / "dev_inference.json", "w") as res:
             json.dump(eval_results, res)
