@@ -89,7 +89,6 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.prompt_id={config.model_series_dir[-1]}"
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
-
         elif 'riken' in config.config_path:
             model_type = config.model_series_dir.split('/')[-3].split('_')[0]
             riken_ids = config.model_series_dir.split('/')[-1].split('_')
@@ -106,6 +105,8 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.fold={model_dir_name[-1]}"
             args_str += " "
             args_str += f"model.model_type={model_type}"
+
+            
         if config.script == 'run_gp.py':
             encoder_model_path = '/'.join(str(model_path).replace('GP', 'classification').split('/')[:-1])
             args_str += " "
