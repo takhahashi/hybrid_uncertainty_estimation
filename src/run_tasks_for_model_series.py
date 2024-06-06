@@ -59,8 +59,7 @@ def run_glue_for_model_series_fast(config, work_dir):
                 model_path = Path(model_path) / "model"
         else:
             model_path = config.model_series_dir
-        if not os.path.isdir(model_path):
-            continue
+
         model_args_str = config.args
         model_args_str += " "
         model_args_str += f"model.model_name_or_path={model_path}"
