@@ -52,6 +52,8 @@ def run_glue_for_model_series_fast(config, work_dir):
             if "fairlib" in str(config.model_series_dir):
                 # ensemble & fairlib case
                 model_path = Path(model_path) / "models"
+            if config.script == 'run_gp.py':
+                model_path = Path(model_path) / "model"
         else:
             model_path = config.model_series_dir
         if not os.path.isdir(model_path):
@@ -87,6 +89,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.prompt_id={config.model_series_dir[-1]}"
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
+
         elif 'riken' in config.config_path:
             model_type = config.model_series_dir.split('/')[-3].split('_')[0]
             riken_ids = config.model_series_dir.split('/')[-1].split('_')
@@ -103,10 +106,15 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.fold={model_dir_name[-1]}"
             args_str += " "
             args_str += f"model.model_type={model_type}"
+        if config.script == 'run_gp.py':
+            encoder_model_path = '/'.join(str(model_path).replace('GP', 'classification').split('/')[:-1])
+            args_str += " "
+            args_str += f"++encoder_model.model_name_or_path={encoder_model_path}"
+            args_str += " "
+            args_str += f"++encoder_model.model_type={"classification"}"
             
         else:
-            args_str += " "
-            args_str += f"seed={seed}"
+            raise ValueError(f"PATH:{config.config_path} is INVALID!")
 
         task = {
             "config_path": config.config_path,
@@ -130,6 +138,7 @@ def run_glue_for_model_series_fast(config, work_dir):
 
     run_tasks(config_path, config.cuda_devices)
 
+        
 
 if __name__ == "__main__":
 
