@@ -356,6 +356,12 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
             loss.backward()
             optimizer.step()
 
+            print('Iter %d/%d - Loss: %.3f lengthscale: %.3f noise: %.3f' % (
+                i+1, epoch, loss.item(),
+                GPmodel.covar_module.base_kernel.lengthscale.item(),
+                GPmodel.likelihood.noise.item()
+            ))
+
         torch.save(GPmodel.state_dict(), work_dir + '/model')
 
     #################### Predicting##########################
