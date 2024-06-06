@@ -151,9 +151,6 @@ if __name__ == "__main__":
         log.info(f"Work dir: {auto_generated_dir}")
         os.chdir(hydra.utils.get_original_cwd())
 
-        if config.script == 'run_gp.py':
-            run_gp_for_model_series(config, auto_generated_dir)
-        else:
-            run_glue_for_model_series_fast(config, auto_generated_dir)
+        run_glue_for_model_series_fast(config, auto_generated_dir)
 
     main()
