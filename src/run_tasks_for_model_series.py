@@ -106,13 +106,13 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += " "
             args_str += f"model.model_type={model_type}"
 
-            
+
         if config.script == 'run_gp.py':
             encoder_model_path = '/'.join(str(model_path).replace('GP', 'classification').split('/')[:-1])
             args_str += " "
             args_str += f"++encoder_model.model_name_or_path={encoder_model_path}"
             args_str += " "
-            args_str += f"++encoder_model.model_type={"classification"}"
+            args_str += f"++encoder_model.model_type=classification"
             
         else:
             raise ValueError(f"PATH:{config.config_path} is INVALID!")
