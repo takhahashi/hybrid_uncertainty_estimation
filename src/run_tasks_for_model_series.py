@@ -104,6 +104,8 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"data.fold={model_dir_name[-1]}"
             args_str += " "
             args_str += f"model.model_type={model_type}"
+        else:
+            raise ValueError(f"PATH:{config.config_path} is INVALID!")
 
 
         if config.script == 'run_gp.py':
@@ -112,9 +114,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += f"++encoder_model.model_name_or_path={encoder_model_path}"
             args_str += " "
             args_str += f"++encoder_model.model_type=classification"
-            
-        else:
-            raise ValueError(f"PATH:{config.config_path} is INVALID!")
+
 
         task = {
             "config_path": config.config_path,
