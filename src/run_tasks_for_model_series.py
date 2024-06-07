@@ -89,6 +89,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += " "
             args_str += f"data.fold={model_dir_name[-1]}"
         elif 'riken' in config.config_path:
+            print(model_dir_name)
             model_type = config.model_series_dir.split('/')[-3].split('_')[0]
             riken_ids = config.model_series_dir.split('/')[-1].split('_')
             question_id = riken_ids[0]
