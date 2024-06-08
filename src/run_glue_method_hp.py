@@ -460,6 +460,7 @@ def main(config):
     init_wandb(auto_generated_dir, config)
 
     fix_config(config)
+    config.training.weight_decay=0.0
 
     args_train = TrainingArgsWithLossCoefs(
         output_dir=auto_generated_dir,
