@@ -18,6 +18,7 @@ from sklearn.model_selection import train_test_split
 from functools import reduce
 from utils.utils_data_score_range import upper_score_dic, asap_ranges
 import pdb
+from collections import defaultdict
 
 import logging
 
@@ -1833,20 +1834,24 @@ def simple_collate_fn(list_of_data):
     for data in list_of_data:
         if(torch.count_nonzero(torch.tensor(data['attention_mask'])) > pad_max_len):
             pad_max_len = torch.count_nonzero(torch.tensor(data['attention_mask']))
-    in_ids, token_type, atten_mask, labels = [], [], [], []
+    batched_tensor = defaultdict(list)
+    labels = []
     for data in list_of_data:
-        in_ids.append(torch.tensor(data['input_ids'][:pad_max_len]))
-        token_type.append(torch.tensor(data['token_type_ids'][:pad_max_len]))
-        atten_mask.append(torch.tensor(data['attention_mask'][:pad_max_len]))
-        if 'label' in data.keys():
-            labels.append(torch.tensor(data['label']))
-    batched_tensor = {}
-    batched_tensor['input_ids'] = torch.stack(in_ids)
-    batched_tensor['token_type_ids'] = torch.stack(token_type)
-    batched_tensor['attention_mask'] = torch.stack(atten_mask)
+        for k, v in data.items():
+            if k != 'label':
+                batched_tensor[k].append(torch.tensor(v[:pad_max_len]))
+            else:
+                labels.append(torch.tensor(v))
+    for k, v in data.imtes():
+        batched_tensor[k] = torch.stack(v)
     if len(labels) != 0:
         if labels[0].shape  != torch.tensor(1).shape:
             batched_tensor['labels'] = torch.stack(labels)
         else:
             batched_tensor['labels'] = torch.tensor(labels)
+
+    print("=============batched_tesnor===============")
+    print(batched_tensor)
+    print("=============labels===============")
+    print(labels)
     return batched_tensor
