@@ -1842,7 +1842,7 @@ def simple_collate_fn(list_of_data):
                 batched_tensor[k].append(torch.tensor(v[:pad_max_len]))
             else:
                 labels.append(torch.tensor(v))
-    for k, v in data.items():
+    for k, v in batched_tensor.items():
         print(v)
         batched_tensor[k] = torch.stack(v)
     if len(labels) != 0:
