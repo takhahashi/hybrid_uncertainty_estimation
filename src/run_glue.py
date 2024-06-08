@@ -605,7 +605,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             model,
             tokenizer,
             trainer,
-            test_dataset, ##############
+            eval_dataset, ##############
             train_dataset,
             calibration_dataset,
             metric,
