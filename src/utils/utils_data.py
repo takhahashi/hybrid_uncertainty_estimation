@@ -1852,7 +1852,6 @@ def simple_collate_fn(list_of_data):
             batched_tensor['labels'] = torch.tensor(labels)
 
     print("=============batched_tesnor===============")
-    print(batched_tensor)
-    print("=============labels===============")
-    print(labels)
+    print(type(batched_tensor))
+
     return batched_tensor
