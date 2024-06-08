@@ -338,115 +338,17 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     train_dataset = datasets["train"]
     train_indexes = list(range(len(train_dataset)))
     calibration_dataset = None
-    if (
-        config.do_train
-        or config.ue.calibrate
-        or config.ue.ue_type
-        in [
-            "maha",
-            "nuq",
-            "l-nuq",
-            "l-maha",
-            "mc_maha",
-            "msd",
-            "ddu",
-            "decomposing_md",
-            "rde",
-        ]
-        or (
-            config.ue.dropout_type == "DPP"
-            and config.ue.dropout.dry_run_dataset == "train"
-        )
-    ):
-        if config.data.subsample_perc > 0:
-            train_indexes = random.sample(
-                train_indexes, int(len(train_indexes) * config.data.subsample_perc)
-            )
-        ##############
+    eval_dataset = datasets["validation"]
 
-        if config.data.eval_subsample > 0:
-            train_indexes, eval_indexes = train_test_split(
-                train_indexes,
-                test_size=config.data.eval_subsample,
-                random_state=config.data.validation_seed,
-            )
-        else:
-            eval_indexes = train_indexes
-
-        ##############
-
-        if config.data.validation_subsample > 0:
-            train_indexes, calibration_indexes = train_test_split(
-                train_indexes,
-                test_size=config.data.validation_subsample,
-                random_state=config.data.validation_seed,
-            )
-        else:
-            calibration_indexes = train_indexes
-
-        calibration_dataset = torch.utils.data.Subset(
-            train_dataset, calibration_indexes
-        )
-        if config.data.task_name == 'asap' or config.data.task_name == 'riken':
-            eval_dataset = datasets["validation"]
-        else:
-            eval_dataset = torch.utils.data.Subset(train_dataset, eval_indexes)
-            train_dataset = torch.utils.data.Subset(train_dataset, train_indexes)
-        if config.data.task_name != 'asap' and config.data.task_name != 'riken':
-            with open(Path(work_dir) / "calibration_indexes.pkl", "wb") as f:
-                pickle.dump(calibration_indexes, f)
-            with open(Path(work_dir) / "training_indexes.pkl", "wb") as f:
-                pickle.dump(train_indexes, f)
-            with open(Path(work_dir) / "eval_indexes.pkl", "wb") as f:
-                pickle.dump(eval_indexes, f)
-
-        log.info(f"Training dataset size: {len(train_dataset)}")
-        log.info(f"Calibration dataset size: {len(calibration_dataset)}")
-        log.info(f"Eval dataset size: {len(eval_dataset)}")
+    log.info(f"Training dataset size: {len(train_dataset)}")
+    log.info(f"Eval dataset size: {len(eval_dataset)}")
     
-    elif (
-        config.ue.dropout_type == "DPP" and config.ue.dropout.dry_run_dataset != "eval"
-    ) or (config.do_ue_estimate):
-        calibration_indexes_path = (
-            Path(config.model.model_name_or_path) / "calibration_indexes.pkl"
-        )
-        with open(calibration_indexes_path, "rb") as f:
-            calibration_indexes = pickle.load(f)
+    test_dataset = datasets["test"]
 
-        calibration_dataset = torch.utils.data.Subset(
-            train_dataset, calibration_indexes
-        )
-        log.info(f"Calibration dataset size: {len(calibration_dataset)}")
+    metric = load_metric(
+        "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
+    )
 
-        eval_indexes_path = Path(config.model.model_name_or_path) / "eval_indexes.pkl"
-        with open(eval_indexes_path, "rb") as f:
-            eval_indexes = pickle.load(f)
-
-        eval_dataset = torch.utils.data.Subset(train_dataset, eval_indexes)
-        log.info(f"Eval dataset size: {len(eval_dataset)}")
-
-        training_indexes_path = (
-            Path(config.model.model_name_or_path) / "training_indexes.pkl"
-        )
-        with open(training_indexes_path, "rb") as f:
-            train_indexes = pickle.load(f)
-
-        train_dataset = torch.utils.data.Subset(train_dataset, train_indexes)
-        log.info(f"Training dataset size: {len(train_dataset)}")
-
-    if data_args.task_name in glue_datasets:
-        metric = load_metric(
-            "glue", data_args.task_name, keep_in_memory=True, cache_dir=config.cache_dir
-        )
-    else:
-        metric = load_metric(
-            "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
-        )
-    if config.data.task_name == 'asap' or config.data.task_name == 'riken':
-        eval_dataset = datasets["validation"]
-        test_dataset = (
-            datasets["test"] if config.do_eval or config.do_ue_estimate else None
-        )
     is_regression = False
     metric_fn = lambda p: compute_metrics(is_regression, metric, num_labels, p)
 
