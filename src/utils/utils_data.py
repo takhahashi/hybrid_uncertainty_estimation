@@ -1843,6 +1843,7 @@ def simple_collate_fn(list_of_data):
             else:
                 labels.append(torch.tensor(v))
     for k, v in data.items():
+        print(v)
         batched_tensor[k] = torch.stack(v)
     if len(labels) != 0:
         if labels[0].shape  != torch.tensor(1).shape:
