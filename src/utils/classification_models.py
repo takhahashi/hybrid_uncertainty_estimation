@@ -553,6 +553,7 @@ def create_roberta(
         config=model_config,
         cache_dir=config.cache_dir,
     )
+    """
     if use_spectralnorm:
         if ue_args.use_cache:
             model = build_model(
@@ -587,6 +588,24 @@ def create_roberta(
             model.use_cache = False
         model.classifier = ElectraClassificationHeadCustom(model.classifier)
         log.info("Replaced RoBERTA's head")
+    """
+    if model_config.model_type == 'hybrid':
+        model = build_model(
+            HybridRoberta, model_config._name_or_path, ue_args.reg_type, **model_kwargs
+        )
+        log.info("loaded HybridRoberta constraction")
+    elif model_config.model_type == 'regression':
+        model = build_model(
+            RobertaForSequenceRegression, model_path_or_name, **model_kwargs
+        )
+        log.info("loaded RobertaForSequenceRegression constraction")
+    elif model_config.model_type == 'classification':
+        model = build_model(
+            RobertaForSequenceClassification, model_path_or_name, **model_kwargs
+        )
+        log.info("loaded RobertaForSequenceClassification constraction")
+    else:
+        raise ValueError(f"{model_config.model_type} IS INVALID MODEL_TYPE")
     return model
 
 
