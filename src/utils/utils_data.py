@@ -1848,10 +1848,7 @@ def simple_collate_fn(list_of_data):
         if labels[0].shape  != torch.tensor(1).shape:
             batched_tensor['labels'] = torch.stack(labels)
         else:
-            print(labels)
             batched_tensor['labels'] = torch.tensor(labels)
 
-    print("=============batched_tesnor===============")
-    print(type(batched_tensor))
 
-    return batched_tensor
+    return dict(batched_tensor)
