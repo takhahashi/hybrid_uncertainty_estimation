@@ -1850,5 +1850,4 @@ def simple_collate_fn(list_of_data):
         else:
             batched_tensor['labels'] = torch.tensor(labels)
 
-
     return dict(batched_tensor)
