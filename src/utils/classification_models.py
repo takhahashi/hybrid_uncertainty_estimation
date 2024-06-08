@@ -33,6 +33,9 @@ from transformers import (
     RobertaForSequenceClassification,
     DistilBertForSequenceClassification,
     BertModel,
+    DistilBertPreTrainedModel,
+    DistilBertModel,
+    DistilBertForSequenceClassification,
 )
 from transformers.modeling_outputs import (
     ModelOutput,
@@ -726,6 +729,7 @@ def create_distilbert(
         config=model_config,
         cache_dir=config.cache_dir,
     )
+    """
     if use_mixup:
         model = build_model(
             DistilBertForSequenceClassificationMSD, model_path_or_name, **model_kwargs
@@ -768,6 +772,24 @@ def create_distilbert(
             )
         if ue_args.use_cache:
             model.disable_cache()
+    """
+    if model_config.model_type == 'hybrid':
+        model = build_model(
+            HybridDistilBert, model_config._name_or_path, ue_args.reg_type, **model_kwargs
+        )
+        log.info("loaded HybridDistilBert constraction")
+    elif model_config.model_type == 'regression':
+        model = build_model(
+            DistilBertForSequenceRegression, model_path_or_name, **model_kwargs
+        )
+        log.info("loaded RegressionDistilBert constraction")
+    elif model_config.model_type == 'classification':
+        model = build_model(
+            DistilBertForSequenceClassification, model_path_or_name, **model_kwargs
+        )
+        log.info("loaded ClassificationDistilBert constraction")
+    else:
+        raise ValueError(f"{model_config.model_type} IS INVALID MODEL_TYPE")
     return model
 
 
@@ -1073,7 +1095,100 @@ class BertForSequenceRegression(BertPreTrainedModel):
         loss = torch.exp(-pred_lnvar)*torch.pow(labels - pred_score, 2)/2 + pred_lnvar/2
         loss = torch.sum(loss)
         return loss
+
+class DistilBertForSequenceRegression(DistilBertPreTrainedModel):
+    def __init__(self, config):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.config = config
+
+        self.distilbert = DistilBertModel(config)
+        self.pre_classifier = nn.Linear(config.dim, config.dim)
+        self.score_predictor = nn.Linear(config.dim, 1)
+        self.variance_predictor = nn.Linear(config.dim, 1)
+        self.dropout = nn.Dropout(config.seq_classif_dropout)
+        self.sigmoid = nn.Sigmoid()
+        # Initialize weights and apply final processing
+        self.post_init()
+
+    def get_position_embeddings(self) -> nn.Embedding:
+        """
+        Returns the position embeddings
+        """
+        return self.distilbert.get_position_embeddings()
+
+    def resize_position_embeddings(self, new_num_position_embeddings: int):
+        """
+        Resizes position embeddings of the model if `new_num_position_embeddings != config.max_position_embeddings`.
+
+        Arguments:
+            new_num_position_embeddings (`int`):
+                The number of new position embedding matrix. If position embeddings are learned, increasing the size
+                will add newly initialized vectors at the end, whereas reducing the size will remove vectors from the
+                end. If position embeddings are not learned (*e.g.* sinusoidal position embeddings), increasing the
+                size will add correct vectors at the end following the position encoding algorithm, whereas reducing
+                the size will remove vectors from the end.
+        """
+        self.distilbert.resize_position_embeddings(new_num_position_embeddings)
+
+    def forward(
+        self,
+        input_ids = None,
+        attention_mask = None,
+        head_mask = None,
+        inputs_embeds = None,
+        labels = None,
+        output_attentions = None,
+        output_hidden_states = None,
+        return_dict = None,
+    ):
+        r"""
+        labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
+            Labels for computing the sequence classification/regression loss. Indices should be in `[0, ...,
+            config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
+            `config.num_labels > 1` a classification loss is computed (Cross-Entropy).
+        """
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        distilbert_output = self.distilbert(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+        hidden_state = distilbert_output[0]  # (bs, seq_len, dim)
+        pooled_output = hidden_state[:, 0]  # (bs, dim)
+        pooled_output = self.pre_classifier(pooled_output)  # (bs, dim)
+        pooled_output = nn.ReLU()(pooled_output)  # (bs, dim)
+        pooled_output = self.dropout(pooled_output)  # (bs, dim)
+        pred_score = self.sigmoid(self.score_predictor(pooled_output))  # (bs, num_labels)
+        pred_lnvar = self.variance_predictor(pooled_output)
+
+        loss = None
+        if labels is not None:
+            reg_labels = labels.view(-1) / (self.num_labels - 1)
+            loss = self.loss(pred_score=pred_score.view(-1), pred_lnvar=pred_lnvar.view(-1), labels=reg_labels)
+
+        if not return_dict:
+            output = (pred_score,pred_lnvar,) + distilbert_output[1:]
+            return ((loss,) + output) if loss is not None else output
+
+        return RegressionOutput(
+            loss=loss,
+            pred_score=pred_score,
+            pred_lnvar=pred_lnvar,
+            hidden_states=distilbert_output.hidden_states,
+            attentions=distilbert_output.attentions,
+        )
     
+    def loss(self, pred_score, pred_lnvar, labels):    
+        loss = torch.exp(-pred_lnvar)*torch.pow(labels - pred_score, 2)/2 + pred_lnvar/2
+        loss = torch.sum(loss)
+        return loss
+
 class GPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood, lengthscale=None):
         super(GPModel, self).__init__(train_x, train_y, likelihood)
