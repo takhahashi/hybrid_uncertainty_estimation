@@ -36,6 +36,8 @@ from transformers import (
     DistilBertPreTrainedModel,
     DistilBertModel,
     DistilBertForSequenceClassification,
+    RobertaModel,
+    RobertaPreTrainedModel,
 )
 from transformers.modeling_outputs import (
     ModelOutput,
@@ -1035,6 +1037,95 @@ class HybridDistilBert(DistilBertPreTrainedModel):
             hidden_states=distilbert_output.hidden_states,
             attentions=distilbert_output.attentions,
         )
+    
+class HybridRoberta(RobertaPreTrainedModel):
+    def __init__(self, config):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.config = config
+
+        self.roberta = RobertaModel(config, add_pooling_layer=False)
+        self.dense = nn.Linear(config.hidden_size, config.hidden_size)
+        dropout = (
+            config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
+        )
+        self.dropout = nn.Dropout(dropout)
+
+        self.classifier = nn.Linear(config.dim, config.num_labels)
+        self.regressor = nn.Linear(config.dim, 1)
+
+        self.sigmoid = nn.Sigmoid()
+
+        self.lsb = ScaleDiffBalance(task_names=['regression', 'classification'])
+        self.scale_weights = {}
+        self.diff_weights = {}
+        # Initialize weights and apply final processing
+        self.post_init()
+
+
+    def forward(
+        self,
+        input_ids = None,
+        attention_mask = None,
+        token_type_ids = None,
+        position_ids = None,
+        head_mask = None,
+        inputs_embeds = None,
+        labels = None,
+        output_attentions = None,
+        output_hidden_states = None,
+        return_dict = None,
+    ):
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        outputs = self.roberta(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+        sequence_output = outputs[0][:, 0, :]
+        pooled_output = self.dropout(sequence_output)
+        pooled_output = self.dense(pooled_output)
+        pooled_output = torch.tanh(pooled_output)
+        pooled_output = self.dropout(pooled_output)
+
+                
+        regressor_output = self.sigmoid(self.regressor(pooled_output))  # (bs, num_labels)
+        logits = self.classifier(pooled_output)
+
+        loss = None
+        if labels is not None:
+            ########regression loss########
+            reg_labels = labels.view(-1) / (self.num_labels - 1)
+            loss_fct = MSELoss()
+            r_loss = loss_fct(regressor_output.view(-1), reg_labels)  
+            
+            ########classification loss#########
+            loss_fct = CrossEntropyLoss()
+            c_loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+            
+            loss, s_wei, diff_wei, alpha, pre_loss = self.lsb(regression=r_loss, classification=c_loss)
+            self.scale_weights = s_wei
+            self.diff_weights = diff_wei
+
+        if not return_dict:
+            output = (logits,) + outputs[2:]
+            return ((loss,) + output) if loss is not None else output
+
+        return HybridOutput(
+            loss=loss,
+            logits=logits,
+            reg_output=regressor_output,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+        )
+    
         
 class ScaleDiffBalance:
   def __init__(self, task_names, priority=None, beta=1.):
@@ -1286,6 +1377,82 @@ class DistilBertForSequenceRegression(DistilBertPreTrainedModel):
             pred_lnvar=pred_lnvar,
             hidden_states=distilbert_output.hidden_states,
             attentions=distilbert_output.attentions,
+        )
+    
+    def loss(self, pred_score, pred_lnvar, labels):    
+        loss = torch.exp(-pred_lnvar)*torch.pow(labels - pred_score, 2)/2 + pred_lnvar/2
+        loss = torch.sum(loss)
+        return loss
+
+class RobertaForSequenceRegression(RobertaPreTrainedModel):
+    def __init__(self, config):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.config = config
+
+        self.roberta = RobertaModel(config, add_pooling_layer=False)
+        self.dense = nn.Linear(config.hidden_size, config.hidden_size)
+        dropout = (
+            config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
+        )
+        self.dropout = nn.Dropout(dropout)
+        self.score_predictor = nn.Linear(config.dim, 1)
+        self.variance_predictor = nn.Linear(config.dim, 1)
+        self.sigmoid = nn.Sigmoid()
+
+        # Initialize weights and apply final processing
+        self.post_init()
+
+
+    def forward(
+        self,
+        input_ids = None,
+        attention_mask = None,
+        token_type_ids = None,
+        position_ids = None,
+        head_mask = None,
+        inputs_embeds = None,
+        labels = None,
+        output_attentions = None,
+        output_hidden_states = None,
+        return_dict = None,
+    ):
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        outputs = self.roberta(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+        sequence_output = outputs[0][:, 0, :]
+        pooled_output = self.dropout(sequence_output)
+        pooled_output = self.dense(pooled_output)
+        pooled_output = torch.tanh(pooled_output)
+        pooled_output = self.dropout(pooled_output)
+        pred_score = self.sigmoid(self.score_predictor(pooled_output))  # (bs, num_labels)
+        pred_lnvar = self.variance_predictor(pooled_output)
+    
+        loss = None
+        if labels is not None:
+            reg_labels = labels.view(-1) / (self.num_labels - 1)
+            loss = self.loss(pred_score=pred_score.view(-1), pred_lnvar=pred_lnvar.view(-1), labels=reg_labels)
+
+        if not return_dict:
+            output = (pred_score,pred_lnvar,) + outputs[2:]
+            return ((loss,) + output) if loss is not None else output
+
+        return RegressionOutput(
+            loss=loss,
+            pred_score=pred_score,
+            pred_lnvar=pred_lnvar,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
         )
     
     def loss(self, pred_score, pred_lnvar, labels):    
