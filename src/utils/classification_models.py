@@ -1070,8 +1070,8 @@ class HybridRoberta(RobertaPreTrainedModel):
         )
         self.dropout = nn.Dropout(dropout)
 
-        self.classifier = nn.Linear(config.dim, config.num_labels)
-        self.regressor = nn.Linear(config.dim, 1)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        self.regressor = nn.Linear(config.hidden_size, 1)
 
         self.sigmoid = nn.Sigmoid()
 
@@ -1415,8 +1415,8 @@ class RobertaForSequenceRegression(RobertaPreTrainedModel):
             config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
         )
         self.dropout = nn.Dropout(dropout)
-        self.score_predictor = nn.Linear(config.dim, 1)
-        self.variance_predictor = nn.Linear(config.dim, 1)
+        self.score_predictor = nn.Linear(config.hidden_size, 1)
+        self.variance_predictor = nn.Linear(config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
 
         # Initialize weights and apply final processing
