@@ -41,10 +41,17 @@ def init_wandb(directory, config, wandb_disabled=False):
     group_name = f"{task}|{model_name}|{strat_name}|{date}"
     run_name = f"{run_name}"
     print('config:',config)
-    if 'deberta' in config.model.model_name_or_path:
-        model_name = 'deberta'
-    else:
-        model_name = 'bert'
+    model_name='bert'
+    model_names = [
+        'deberta',
+        'roberta',
+        'distilbert',
+        'bert',
+    ]
+    for m_name in model_names:
+        if m_name in config.model.model_name_or_path:
+            model_name = m_name
+            break
 
     if not wandb_disabled:
         if "hybrid" == config.model.model_type:
