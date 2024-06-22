@@ -239,6 +239,7 @@ def multiclass_metric_loss_fast_optimized(
                 torch.clamp(margin - 1 / dim * (matrix**2), min=0)
             )
             num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
+    exit()
 
 
     if num_intra > 0:
