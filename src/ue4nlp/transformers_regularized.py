@@ -222,27 +222,26 @@ def multiclass_metric_loss_fast_optimized(
         for l, k in enumerate(batch_labels[n + 1 :]):
             s_q = len(indices[k])
             if probabilities != None:
-                p_matrix = curr_p.unsqueeze(1) * cls_p[k]
+                p_matrix = (curr_p.unsqueeze(1) * cls_p[k]).flatten()
                 matrix = ((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
 
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
-            print("===============flatten==================")
-            print(p_matrix.flatten())
-            print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten())
 
-            print("===============margine==================")
+            print("=========matrix===========")
+            print(p_matrix)
+            print(matrix)
             print(margin)
-            print("===============ans==================")
-            print(margin * p_matrix.flatten() - 1 / 1 * (matrix**2))
+
+            print("=========ans_matrix===========")
+            print(margin * p_matrix - 1 / 1 * (matrix**2))
 
             loss_inter += torch.sum(
-                torch.clamp(margin * p_matrix.flatten() - 1 / dim * (matrix**2), min=0)
+                torch.clamp(margin * p_matrix - 1 / dim * (matrix**2), min=0)
             )
             num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
+
     exit()
-
-
     if num_intra > 0:
         loss_intra = loss_intra / num_intra
     if num_inter > 0:
