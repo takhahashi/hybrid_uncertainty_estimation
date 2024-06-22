@@ -228,20 +228,11 @@ def multiclass_metric_loss_fast_optimized(
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
 
-            print("=========matrix===========")
-            print(p_matrix)
-            print(matrix)
-            print(margin)
-
-            print("=========ans_matrix===========")
-            print(margin * p_matrix - 1 / 1 * (matrix**2))
-
             loss_inter += torch.sum(
                 torch.clamp(margin * p_matrix - 1 / dim * (matrix**2), min=0)
             )
             num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
 
-    exit()
     if num_intra > 0:
         loss_intra = loss_intra / num_intra
     if num_inter > 0:
