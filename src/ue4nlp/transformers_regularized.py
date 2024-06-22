@@ -231,7 +231,7 @@ def multiclass_metric_loss_fast_optimized(
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
             print("===============flatten==================")
-            print(p_matrix.flatten)
+            print(p_matrix.flatten())
             print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten())
             print("==============ans_flatten==================")
             print(matrix)
