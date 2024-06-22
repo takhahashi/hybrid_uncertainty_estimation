@@ -223,24 +223,21 @@ def multiclass_metric_loss_fast_optimized(
             s_q = len(indices[k])
             if probabilities != None:
                 p_matrix = curr_p.unsqueeze(1) * cls_p[k]
-                print("===============Probabilities==================")
-                print(curr_p)
-                print(cls_p[k])
-                print("===============matrix==================")
-
-                print(p_matrix)
-                print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1))
-                matrix = (p_matrix * (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
+                matrix = ((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
 
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
             print("===============flatten==================")
             print(p_matrix.flatten())
             print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten())
-            print("==============ans_flatten==================")
-            print(matrix)
+
+            print("===============margine==================")
+            print(margin)
+            print("===============ans==================")
+            print(margin * p_matrix.flatten() - 1 / 1 * (matrix**2))
+
             loss_inter += torch.sum(
-                torch.clamp(margin - 1 / dim * (matrix**2), min=0)
+                torch.clamp(margin * p_matrix.flatten() - 1 / dim * (matrix**2), min=0)
             )
             num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
     exit()
