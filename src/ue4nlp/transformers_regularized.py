@@ -223,7 +223,11 @@ def multiclass_metric_loss_fast_optimized(
             s_q = len(indices[k])
             if probabilities != None:
                 p_matrix = curr_p.unsqueeze(1) * cls_p[k]
+                print("===============Probabilities==================")
+                print(curr_p)
+                print(cls_p[k])
                 print("===============matrix==================")
+
                 print(p_matrix)
                 print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1))
                 matrix = (p_matrix * (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
