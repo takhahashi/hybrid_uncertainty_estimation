@@ -169,7 +169,7 @@ def multiclass_metric_loss_fast(
 
 
 def multiclass_metric_loss_fast_optimized(
-    represent, target, margin=10, class_num=2, start_idx=1, per_class_norm=False, probabilities=None,
+    represent, target, margin=10, class_num=2, start_idx=1, probabilities=None,
 ):
     target_list = target.data.tolist()
     dim = represent.data.shape[1]
@@ -206,15 +206,9 @@ def multiclass_metric_loss_fast_optimized(
                 triangle_matrix = torch.triu(
                     (curr_repr.unsqueeze(1) - curr_repr).norm(2, dim=-1)
                 )
-            if per_class_norm:
-                loss_intra += (
-                    torch.sum(1 / dim * (triangle_matrix**2))
-                    / np.max([(s_k**2 - s_k), 1])
-                    * 2
-                )
-            else:
-                loss_intra += torch.sum(1 / dim * (triangle_matrix**2))
-                num_intra += (curr_repr.shape[0] ** 2 - curr_repr.shape[0]) / 2
+
+            loss_intra += torch.sum(1 / dim * (triangle_matrix**2))
+            num_intra += (curr_repr.shape[0] ** 2 - curr_repr.shape[0]) / 2
 
     batch_labels = list(cls_repr.keys())
     bs = represent.shape[0]
@@ -229,24 +223,27 @@ def multiclass_metric_loss_fast_optimized(
             s_q = len(indices[k])
             if probabilities != None:
                 p_matrix = curr_p.unsqueeze(1) * cls_p[k]
+                print("===============matrix==================")
+                print(p_matrix)
+                print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1))
                 matrix = (p_matrix * (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1)).flatten()
 
             else:
                 matrix = (curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten()
-            if per_class_norm:
-                loss_inter += torch.sum(
-                    torch.clamp(margin - 1 / dim * (matrix**2), min=0)
-                ) / np.max([(s_k * s_q), 1])
-            else:
-                loss_inter += torch.sum(
-                    torch.clamp(margin - 1 / dim * (matrix**2), min=0)
-                )
-                num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
+            print("===============flatten==================")
+            print(p_matrix.flatten)
+            print((curr_repr.unsqueeze(1) - cls_repr[k]).norm(2, dim=-1).flatten())
+            print("==============ans_flatten==================")
+            print(matrix)
+            loss_inter += torch.sum(
+                torch.clamp(margin - 1 / dim * (matrix**2), min=0)
+            )
+            num_inter += cls_repr[k].shape[0] * curr_repr.shape[0]
 
 
-    if num_intra > 0 and not (per_class_norm):
+    if num_intra > 0:
         loss_intra = loss_intra / num_intra
-    if num_inter > 0 and not (per_class_norm):
+    if num_inter > 0:
         loss_inter = loss_inter / num_inter
 
 
