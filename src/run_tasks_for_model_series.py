@@ -89,7 +89,6 @@ def run_glue_for_model_series_fast(config, work_dir):
             args_str += " "
             args_str += f"data.prompt_id={config.model_series_dir[-1]}"
             args_str += " "
-            print(model_dir_name)
             args_str += f"data.fold={model_dir_name[-1]}"
             args_str += " "
             args_str += f"model.model_type={model_type}"
