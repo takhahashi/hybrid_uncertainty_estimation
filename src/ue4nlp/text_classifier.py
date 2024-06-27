@@ -70,6 +70,7 @@ class TextPredictor:
 
         res = self._trainer.predict(eval_dataset)
         print(type(res))
+        print(type(res.predictions))
         print(res)
         if self.model_type == 'regression':
             pred_score = res[0][0]
