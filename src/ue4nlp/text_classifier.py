@@ -69,6 +69,8 @@ class TextPredictor:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset)
+        print(type(res))
+        print(res)
         if self.model_type == 'regression':
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
@@ -107,7 +109,6 @@ class TextPredictor:
                 probs = logits
 
         if self.model_type == 'hybrid':
-            print(reg_output)
             preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
             return [preds, probs] + list(res)
         elif self.model_type == 'classification':
