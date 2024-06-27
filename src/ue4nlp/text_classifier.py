@@ -77,7 +77,7 @@ class TextPredictor:
             pred_lnvar = res[0][1]
         elif self.model_type == 'hybrid':
             pdb.set_trace()
-            if res[0][0][0].shape() == self._auto_model.num_labels:
+            if res[0][0][0].shape[0] == self._auto_model.num_labels:
                 logits = res[0][0]
                 reg_output = res[0][1]
             else:
