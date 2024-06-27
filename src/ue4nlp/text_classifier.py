@@ -68,7 +68,7 @@ class TextPredictor:
     ):
         self._auto_model.eval()
 
-        res = self._trainer.predict(eval_dataset)
+        res = self._trainer.predict(eval_dataset, ignore_keys=['hidden_states'])
         print(type(res))
         print(type(res.predictions))
         print(res)
