@@ -681,13 +681,10 @@ def main(config):
     else:
         filename = "dev_inference.json"
     config.ue.use_cache=False
-    """
     if not os.path.exists(Path(auto_generated_dir) / filename):
         train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
     else:
         log.info(f"Result file: {auto_generated_dir}/{filename} already exists \n")
-    """
-    train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
 
 
 if __name__ == "__main__":

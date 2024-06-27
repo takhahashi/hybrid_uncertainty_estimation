@@ -76,8 +76,13 @@ class TextPredictor:
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
         elif self.model_type == 'hybrid':
-            logits = res[0][0]
-            reg_output = res[0][1]
+            if res[0][0][0].shape() == self._auto_model.num_labels:
+                logits = res[0][0]
+                reg_output = res[0][1]
+            else:
+                logits = res[0][1]
+                reg_output = res[0][0]
+
         elif self.model_type == 'classification':
             logits = res[0]
             if isinstance(logits, tuple):
