@@ -69,14 +69,11 @@ class TextPredictor:
         self._auto_model.eval()
 
         res = self._trainer.predict(eval_dataset, ignore_keys=['hidden_states'])
-        print(type(res))
-        print(type(res.predictions))
-        print(res)
+
         if self.model_type == 'regression':
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
         elif self.model_type == 'hybrid':
-            pdb.set_trace()
             if res[0][0][0].shape[0] == self._auto_model.num_labels:
                 logits = res[0][0]
                 reg_output = res[0][1]
