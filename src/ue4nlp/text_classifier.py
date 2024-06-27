@@ -107,6 +107,7 @@ class TextPredictor:
                 probs = logits
 
         if self.model_type == 'hybrid':
+            print(reg_output)
             preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
             return [preds, probs] + list(res)
         elif self.model_type == 'classification':
