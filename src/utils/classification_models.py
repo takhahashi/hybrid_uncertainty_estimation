@@ -869,7 +869,7 @@ class HybridBert(BertForSequenceClassification):
             self.label_distribution = False
 
 
-        nn.init.normal_(self.regressor.weight, std=0.1)  # 重みの初期化
+        nn.init.normal_(self.regressor.weight, std=0.02)  # 重みの初期化
         nn.init.normal_(self.regressor.bias, 0)
     
     def forward(
