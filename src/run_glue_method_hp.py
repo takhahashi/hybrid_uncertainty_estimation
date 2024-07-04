@@ -356,16 +356,16 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
     if config.do_train:
         """
-        """
-        training_args.warmup_steps = int(
-            training_args.warmup_ratio  # TODO:
-            * len(train_dataset)
-            * training_args.num_train_epochs
-            / training_args.train_batch_size
-        )
-        log.info(f"Warmup steps: {training_args.warmup_steps}")
-        training_args.logging_steps = training_args.warmup_steps
-        """
+
+        #training_args.warmup_steps = int(
+        #    training_args.warmup_ratio  # TODO:
+        #    * len(train_dataset)
+        #    * training_args.num_train_epochs
+        #    / training_args.train_batch_size
+        #)
+        #log.info(f"Warmup steps: {training_args.warmup_steps}")
+        #training_args.logging_steps = training_args.warmup_steps
+
         """
         training_args.weight_decay_rate = training_args.weight_decay
 
