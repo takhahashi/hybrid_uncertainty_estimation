@@ -285,7 +285,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
     model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
 
-    print(model.regressor.weights)
+    print(model.regressor.weight)
     exit()
     ################ Preprocessing the dataset ###########
 
