@@ -3,7 +3,7 @@ hydra:
     dir: ${output_dir}
   sweep:
     dir: ${output_dir}/${model.model_type}_${ue.reg_type}/riken
-    subdir: ${data.question_id}_${data.prompt_id}_${data.score_id}/fold_${data.fold}/id${model.id}
+    subdir: ${data.question_id}_${data.prompt_id}_${data.score_id}/fold_${data.fold}
 
 model:
     id: ???
