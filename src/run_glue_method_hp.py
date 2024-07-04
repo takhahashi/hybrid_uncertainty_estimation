@@ -355,7 +355,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     metric_fn = lambda p: compute_metrics(is_regression, metric, num_labels, p)
 
     if config.do_train:
-        """
+
 
         #training_args.warmup_steps = int(
         #    training_args.warmup_ratio  # TODO:
@@ -366,7 +366,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         #log.info(f"Warmup steps: {training_args.warmup_steps}")
         #training_args.logging_steps = training_args.warmup_steps
 
-        """
+
         training_args.weight_decay_rate = training_args.weight_decay
 
     data_collator = simple_collate_fn
