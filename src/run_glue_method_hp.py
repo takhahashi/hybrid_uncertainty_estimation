@@ -285,8 +285,6 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
     model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
 
-    print(model.regressor.weight)
-    """
     ################ Preprocessing the dataset ###########
 
     sentence1_key, sentence2_key = task_to_keys[data_args.task_name]
@@ -430,7 +428,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
             metric_fn,
             max_seq_length,
         )
-    """
+
 
 
 def update_config(cfg_old, cfg_new):
