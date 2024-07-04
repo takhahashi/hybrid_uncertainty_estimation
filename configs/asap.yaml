@@ -3,7 +3,7 @@ hydra:
     dir: ${output_dir}
   sweep:
     dir: ${output_dir}/${model.model_type}_${ue.reg_type}/asap
-    subdir: prompt_id_${data.prompt_id}/fold_${data.fold}
+    subdir: prompt_id_${data.prompt_id}/fold_${data.fold}/id${model.id}
 
 model:
     model_type: ???
