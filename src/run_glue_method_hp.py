@@ -286,7 +286,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
 
     print(model.regressor.weight)
-    exit()
+    """
     ################ Preprocessing the dataset ###########
 
     sentence1_key, sentence2_key = task_to_keys[data_args.task_name]
@@ -356,6 +356,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
 
     if config.do_train:
         """
+        """
         training_args.warmup_steps = int(
             training_args.warmup_ratio  # TODO:
             * len(train_dataset)
@@ -364,6 +365,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         )
         log.info(f"Warmup steps: {training_args.warmup_steps}")
         training_args.logging_steps = training_args.warmup_steps
+        """
         """
         training_args.weight_decay_rate = training_args.weight_decay
 
@@ -428,6 +430,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
             metric_fn,
             max_seq_length,
         )
+    """
 
 
 def update_config(cfg_old, cfg_new):
