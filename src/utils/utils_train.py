@@ -8,11 +8,12 @@ from transformers.file_utils import add_start_docstrings
 from transformers import Trainer, TrainerCallback
 from ue4nlp.transformers_regularized import (
     SelectiveTrainer,
+    LabelDistributionTrainer,
 )
 
 
 def get_trainer(
-    task: str,  # "cls" or "ner"
+    model_type: str,  
     use_selective: bool,
     use_sngp: bool,
     model,
@@ -25,7 +26,7 @@ def get_trainer(
 ) -> "Trainer":
     training_args.save_total_limit = 1
     training_args.save_steps = 1e5
-    training_args.task = task
+    training_args.task = 'cls'
     if not use_selective and not use_sngp:
         trainer = Trainer(
             model=model,
@@ -57,15 +58,26 @@ def get_trainer(
                 callbacks=callbacks,
             )
     elif use_selective:
-        trainer = SelectiveTrainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            compute_metrics=metric_fn,
-            data_collator=data_collator,
-            callbacks=callbacks,
-        )
+        if training_args.reg_type == 'labeldistributionlearning':
+            trainer = LabelDistributionTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                eval_dataset=eval_dataset,
+                compute_metrics=metric_fn,
+                data_collator=data_collator,
+                callbacks=callbacks,
+            )
+        else:
+            trainer = SelectiveTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                eval_dataset=eval_dataset,
+                compute_metrics=metric_fn,
+                data_collator=data_collator,
+                callbacks=callbacks,
+            )
     return trainer
 
 

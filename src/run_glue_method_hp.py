@@ -384,7 +384,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
         callbacks = None
     #################### Training ##########################
     trainer = get_trainer(
-        "cls",
+        model_args.model_type,
         use_selective,
         use_sngp,
         model,

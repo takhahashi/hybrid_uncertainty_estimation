@@ -656,3 +656,28 @@ class SelectiveTrainer(Trainer):
         logits = nested_detach(logits)
 
         return (loss, logits, labels)
+
+
+class LabelDistributionTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        # compute custom loss (suppose one has 3 labels with different weights)
+        loss_fct = nn.CrossEntropyLoss()
+        soft_labels = self.create_softlabels(labels, self.model.config.num_labels, self.squared_error)
+        print(labels)
+        print(soft_labels)
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), soft_labels)
+        return (loss, outputs) if return_outputs else loss
+    
+    def create_softlabels(self, labels, num_labels, metric_loss_fnc, num_categoris=None):
+        logits = []
+        for y in labels:
+            logits.append([-metric_loss_fnc(y, k) for k in range(num_labels)])
+        soft_labels = torch.tensor(logits, dtype=torch.float64).softmax(dim=1)
+        return soft_labels
+    
+    def squared_error(self, y, k):
+        return (y-k)**2
