@@ -58,7 +58,7 @@ def get_trainer(
                 callbacks=callbacks,
             )
     elif use_selective:
-        if training_args.reg_type == 'labeldistributionlearning':
+        if training_args.reg_type == 'LabelDistributionLearning':
             trainer = LabelDistributionTrainer(
                 model=model,
                 args=training_args,
