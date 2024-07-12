@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 import random
 import torch
+import torch.nn.functional as F
 import hydra
 import pickle
 import yaml
@@ -190,6 +191,89 @@ def reset_params(model: torch.nn.Module):
         else:
             reset_params(model=layer)
 
+def do_predict_eval_ensemble(
+    num_labels,
+    model_args,
+    data_args,
+    ue_args,
+    tokenizer,
+    trainer,
+    eval_dataset,
+    train_dataset,
+    calibration_dataset,
+    eval_metric,
+    config,
+    work_dir,
+    model_dir,
+    metric_fn,
+    max_len,
+):
+    eval_results = {}
+
+    true_labels = [example["label"] for example in eval_dataset]
+    eval_results["true_labels"] = true_labels
+
+    for model_id in range(5):
+        model_args.model_name_or_path = model_args.model_name_or_path[:-1] + f'{model_id}'
+        model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
+
+        trainer.model = model
+        res = trainer.predict(eval_dataset, ignore_keys=['hidden_states'])
+        if res[0][0][0].shape[0] == num_labels:
+            logits = res[0][0]
+            reg_output = res[0][1]
+        else:
+            logits = res[0][1]
+            reg_output = res[0][0]
+        probs = F.softmax(torch.tensor(logits), dim=1).numpy()
+        preds = np.round(reg_output.squeeze() * (num_labels - 1))
+        res = [preds, probs] + list(res)
+
+        eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+        eval_results["eval_score"] = eval_score
+        eval_results["probabilities"] = probs.tolist()
+        eval_results["answers"] = preds.tolist()
+        
+    cls = TextPredictor(
+        model,
+        tokenizer,
+        training_args=config.training,
+        trainer=trainer,
+        max_len=max_len,
+        selectivenet=selectivenet,
+        model_type=config.model.model_type,
+    )
+    start_eval_time = time.time()
+    if config.do_eval:
+        if config.ue.calibrate:
+            cls.predict(calibration_dataset, calibrate=True)
+            log.info(f"Calibration temperature = {cls.temperature}")
+
+
+        log.info("*** Evaluate ***")
+
+        apply_softmax = (
+            bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
+        )
+        res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
+    
+        if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
+            preds, probs = res[:2]
+
+            eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+
+            log.info(f"Eval score: {eval_score}")
+            eval_results["eval_score"] = eval_score
+            eval_results["probabilities"] = probs.tolist()
+            eval_results["answers"] = preds.tolist()
+
+
+    with open(Path(work_dir) / "dev_inference.json", "w") as res:
+        json.dump(eval_results, res)
+
+    if wandb.run is not None:
+        wandb.save(str(Path(work_dir) / "dev_inference.json"))
+    print(eval_results)
 
 def do_predict_eval(
     model,
@@ -601,20 +685,36 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
     #################### Predicting ##########################
 
     if config.do_eval or config.do_ue_estimate:
-        do_predict_eval(
-            model,
-            tokenizer,
-            trainer,
-            test_dataset, ##############
-            train_dataset,
-            calibration_dataset,
-            metric,
-            config,
-            work_dir,
-            model_args.model_name_or_path,
-            metric_fn,
-            max_seq_length,
-        )
+        if config.ue.ue_type == 'ensemble':
+            do_predict_eval_ensemble(
+                model,
+                tokenizer,
+                trainer,
+                test_dataset, 
+                train_dataset,
+                calibration_dataset,
+                metric,
+                config,
+                work_dir,
+                model_args.model_name_or_path,
+                metric_fn,
+                max_seq_length,
+            )
+        else:
+            do_predict_eval(
+                model,
+                tokenizer,
+                trainer,
+                test_dataset, ##############
+                train_dataset,
+                calibration_dataset,
+                metric,
+                config,
+                work_dir,
+                model_args.model_name_or_path,
+                metric_fn,
+                max_seq_length,
+            )
 
 
 def update_config(cfg_old, cfg_new):
