@@ -63,7 +63,7 @@ def run_glue_for_model_series_fast(config, work_dir):
         ):
             model_path = Path(model_dir_name) / "models"
         elif path_exists:
-            model_path = Path(model_series_dir) / model_dir_name + '/id0'
+            model_path = Path(model_series_dir) / model_dir_name / Path('id0')
             if "fairlib" in str(model_series_dir):
                 # ensemble & fairlib case
                 model_path = Path(model_path) / "models"
