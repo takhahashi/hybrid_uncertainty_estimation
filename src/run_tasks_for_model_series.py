@@ -58,6 +58,8 @@ def run_glue_for_model_series_fast(config, work_dir):
         print(config.seeds)
         listdir = [int(seed) for seed in config.seeds]
     for model_dir_name in listdir:
+        print(model_dir_name)
+        exit()
         if "fairlib" in str(model_series_dir) and "ensemble" not in str(
             model_series_dir
         ):
