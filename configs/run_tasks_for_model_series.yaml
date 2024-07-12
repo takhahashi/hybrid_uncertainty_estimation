@@ -5,6 +5,12 @@ hydra:
     
 config_path: '../configs/run_glue.yaml'
 model_series_dir: '../workdir/models/mrpc/electra/'
+task_name: ''
+question_id: ''
+prompt_id: ''
+score_id: ''
+model_type: '' 
+base_model_name: ''
 script: 'run_glue.py'
 args: ''
 seeds: '17'
