@@ -667,9 +667,9 @@ class LabelDistributionTrainer(Trainer):
         # compute custom loss (suppose one has 3 labels with different weights)
         loss_fct = nn.CrossEntropyLoss()
         soft_labels = self.create_softlabels(labels, self.model.config.num_labels, self.squared_error)
-        print(labels)
-        print(soft_labels)
-        loss = loss_fct(logits.view(-1, self.model.config.num_labels), soft_labels)
+        #print(labels)
+        #print(soft_labels)
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), soft_labels.cuda())
         return (loss, outputs) if return_outputs else loss
     
     def create_softlabels(self, labels, num_labels, metric_loss_fnc, num_categoris=None):
