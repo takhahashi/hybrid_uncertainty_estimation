@@ -37,7 +37,7 @@ def run_glue_for_model_series_fast(config, work_dir):
     ue_reg = config.ue_reg
     task_name = config.task_name
     if task_name == 'asap':
-        prompt_id = config.pormpt_id
+        prompt_id = config.prompt_id
         model_series_dir = f'/content/drive/MyDrive/workdir/trained_models/{base_model}/{model_type}_{ue_reg}/asap/prompt_id_{prompt_id}'
 
     elif task_name == 'riken':
