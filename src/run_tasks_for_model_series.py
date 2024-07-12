@@ -53,6 +53,7 @@ def run_glue_for_model_series_fast(config, work_dir):
     elif path_exists:
         listdir = os.listdir(model_series_dir)
     else:
+        print(model_series_dir)
         exit()
         print(config.seeds)
         listdir = [int(seed) for seed in config.seeds]
