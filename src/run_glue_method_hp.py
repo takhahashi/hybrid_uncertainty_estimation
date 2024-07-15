@@ -397,6 +397,11 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     )
     if model_args.model_type == 'hybrid':
         trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
+
+    params = model.state_dict()
+    classifier_params = params['classifier.weight']
+    print('=======classifier_param============')
+    print(classifier_params)
     
     if config.do_train:
         trainer.train(
