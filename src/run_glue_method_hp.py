@@ -251,6 +251,7 @@ def do_predict_eval(
 
 
 def train_eval_glue_model(config, training_args, data_args, work_dir=None):
+    torch.manual_seed(config.model.id)
     log.info(f"config:{config}")
     ue_args = config.ue
     model_args = config.model
