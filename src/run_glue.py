@@ -213,6 +213,7 @@ def do_predict_eval_ensemble(
     true_labels = [example["label"] for example in eval_dataset]
     eval_results["true_labels"] = true_labels
 
+    answers_list, probs_list, eval_score_list = [], [], []
     for model_id in range(5):
         model_args.model_name_or_path = model_args.model_name_or_path[:-1] + f'{model_id}'
         model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
@@ -230,42 +231,12 @@ def do_predict_eval_ensemble(
         res = [preds, probs] + list(res)
 
         eval_score = eval_metric.compute(predictions=preds, references=true_labels)
-        eval_results["eval_score"] = eval_score
-        eval_results["probabilities"] = probs.tolist()
-        eval_results["answers"] = preds.tolist()
-        
-    cls = TextPredictor(
-        model,
-        tokenizer,
-        training_args=config.training,
-        trainer=trainer,
-        max_len=max_len,
-        selectivenet=selectivenet,
-        model_type=config.model.model_type,
-    )
-    start_eval_time = time.time()
-    if config.do_eval:
-        if config.ue.calibrate:
-            cls.predict(calibration_dataset, calibrate=True)
-            log.info(f"Calibration temperature = {cls.temperature}")
-
-
-        log.info("*** Evaluate ***")
-
-        apply_softmax = (
-            bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
-        )
-        res = cls.predict(eval_dataset, apply_softmax=apply_softmax)
-    
-        if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
-            preds, probs = res[:2]
-
-            eval_score = eval_metric.compute(predictions=preds, references=true_labels)
-
-            log.info(f"Eval score: {eval_score}")
-            eval_results["eval_score"] = eval_score
-            eval_results["probabilities"] = probs.tolist()
-            eval_results["answers"] = preds.tolist()
+        answers_list.append(preds)
+        probs_list.append(probs)
+        eval_score_list.append(eval_score)
+    eval_results["eval_score"] = np.mean(eval_score)
+    eval_results["probabilities"] = np.mean(probs_list, axis=0)
+    eval_results["answers"] = np.mean(answers_list, axis=0)
 
 
     with open(Path(work_dir) / "dev_inference.json", "w") as res:
