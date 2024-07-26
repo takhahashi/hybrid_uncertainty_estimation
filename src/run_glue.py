@@ -234,19 +234,16 @@ def do_predict_eval_ensemble(
             logits = res[0][1]
             reg_output = res[0][0]
         probs = F.softmax(torch.tensor(logits), dim=1).numpy()
-        preds = np.round(reg_output.squeeze() * (num_labels - 1))
+        preds = reg_output.squeeze()
         res = [preds, probs] + list(res)
 
-        eval_score = eval_metric.compute(true_labels, preds)
         answers_list.append(preds)
         probs_list.append(probs)
-        eval_score_list.append(eval_score)
-        print(f"==============MODEL_ID:{model_id}==============")
-        print(eval_score)
         
-    eval_results["eval_score"] = eval_score
     eval_results["probabilities"] = np.mean(probs_list, axis=0).tolist()
-    eval_results["answers"] = np.mean(answers_list, axis=0).tolist()
+    answers = np.round(np.mean(answers_list, axis=0) * (num_labels - 1)).tolist()
+    eval_results["answers"] = answers
+    eval_results["eval_score"] = eval_metric.compute(true_labels, answers)
 
 
     with open(Path(work_dir) / "dev_inference.json", "w") as res:
