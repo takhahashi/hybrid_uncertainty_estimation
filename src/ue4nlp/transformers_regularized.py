@@ -681,3 +681,31 @@ class LabelDistributionTrainer(Trainer):
     
     def squared_error(self, y, k):
         return (y-k)**2
+    
+class ExpEntropyTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        probs = F.softmax(logits, dim=1)
+        exps = torch.sum(probs * torch.tensor(range(len(probs[0]))).cuda(), axis=1)
+        print("=================labels========================")
+        print(labels)
+        print("=================logits========================")
+        print(logits)
+        print("=================-prob========================")
+        print(probs)
+        print("=================--exp========================")
+        print(exps)
+        # compute custom loss (suppose one has 3 labels with different weights)
+        loss_fct = MSELoss()
+        r_loss = loss_fct(exps, labels)   
+        entropy = -torch.sum(probs * torch.log2(probs), axis=1)
+        print("=================entropy========================")
+        print(entropy)
+        #print(labels)
+        #print(soft_labels)
+        loss = r_loss + torch.mean(entropy)
+        self.log({f"exp_loss": r_loss, "entropy_loss":torch.mean(entropy)})
+        return (loss, outputs) if return_outputs else loss

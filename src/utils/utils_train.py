@@ -9,6 +9,7 @@ from transformers import Trainer, TrainerCallback
 from ue4nlp.transformers_regularized import (
     SelectiveTrainer,
     LabelDistributionTrainer,
+    ExpEntropyTrainer,
 )
 
 
@@ -61,6 +62,16 @@ def get_trainer(
     elif use_selective:
         if training_args.reg_type == 'LabelDistributionLearning':
             trainer = LabelDistributionTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                eval_dataset=eval_dataset,
+                compute_metrics=metric_fn,
+                data_collator=data_collator,
+                callbacks=callbacks,
+            )
+        elif training_args.reg_type == 'ExpEntropyLearning':
+            trainer = ExpEntropyTrainer(
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset,
