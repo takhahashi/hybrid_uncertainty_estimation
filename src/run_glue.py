@@ -234,7 +234,7 @@ def do_predict_eval_ensemble(
         eval_score_list.append(eval_score)
         break
     print(eval_score)
-    eval_results["eval_score"] = eval_score.tolist()
+    eval_results["eval_score"] = eval_score
     eval_results["probabilities"] = np.mean(probs_list, axis=0).tolist()
     eval_results["answers"] = np.mean(answers_list, axis=0).tolist()
 
