@@ -237,7 +237,7 @@ def do_predict_eval_ensemble(
         preds = np.round(reg_output.squeeze() * (num_labels - 1))
         res = [preds, probs] + list(res)
 
-        eval_score = eval_metric(true_labels, preds)
+        eval_score = eval_metric.compute(true_labels, preds)
         answers_list.append(preds)
         probs_list.append(probs)
         eval_score_list.append(eval_score)
