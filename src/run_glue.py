@@ -18,6 +18,7 @@ import pickle
 import yaml
 from copy import deepcopy
 import time
+from sklearn.metrics import cohen_kappa_score
 
 from utils.utils_wandb import init_wandb, wandb
 
@@ -228,7 +229,7 @@ def do_predict_eval_ensemble(
         preds = np.round(reg_output.squeeze() * (num_labels - 1))
         res = [preds, probs] + list(res)
 
-        eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+        eval_score = eval_metric(true_labels, preds)
         answers_list.append(preds)
         probs_list.append(probs)
         eval_score_list.append(eval_score)
@@ -578,9 +579,12 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             "glue", data_args.task_name, keep_in_memory=True, cache_dir=config.cache_dir
         )
     else:
-        metric = load_metric(
-            "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
+        metric = lambda trues, preds: cohen_kappa_score(
+            trues, preds, labels=list(range(num_labels)), weights='quadratic',
         )
+        #metric = load_metric(
+        #    "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
+        #)
 
     accuracy_metric = load_metric(
         "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
