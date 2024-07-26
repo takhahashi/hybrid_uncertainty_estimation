@@ -692,7 +692,7 @@ class ExpEntropyTrainer(Trainer):
         exps = torch.sum(probs * torch.tensor(range(len(probs[0]))).cuda(), axis=1)
         # compute custom loss (suppose one has 3 labels with different weights)
         loss_fct = MSELoss()
-        r_loss = loss_fct(exps, labels)   
+        r_loss = loss_fct(exps.to(torch.float64), labels.to(torch.float64))   
         print("=================--exp========================")
         print(exps.dtype)
         print("=================labels========================")
@@ -702,6 +702,6 @@ class ExpEntropyTrainer(Trainer):
         print(entropy.dtype)
         #print(labels)
         #print(soft_labels)
-        loss = r_loss + torch.mean(entropy)
+        loss = r_loss + torch.mean(entropy.to(torch.float64))
         self.log({f"exp_loss": r_loss, "entropy_loss":torch.mean(entropy)})
         return (loss, outputs) if return_outputs else loss
