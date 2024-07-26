@@ -216,7 +216,7 @@ def do_predict_eval_ensemble(
         model_args.model_name_or_path = model_args.model_name_or_path[:-1] + f'{model_id}'
         model, tokenizer = create_model(num_labels, model_args, data_args, ue_args, config)
 
-        trainer.model = model
+        trainer.model = model.cuda()
         res = trainer.predict(eval_dataset, ignore_keys=['hidden_states'])
         if res[0][0][0].shape[0] == num_labels:
             logits = res[0][0]
