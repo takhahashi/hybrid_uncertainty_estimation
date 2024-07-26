@@ -204,10 +204,8 @@ def do_predict_eval_ensemble(
     eval_metric,
     config,
     work_dir,
-    model_dir,
-    metric_fn,
-    max_len,
 ):
+    
     eval_results = {}
 
     true_labels = [example["label"] for example in eval_dataset]
@@ -654,22 +652,21 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
         tokenizer.save_pretrained(work_dir)
 
     #################### Predicting ##########################
-
     if config.do_eval or config.do_ue_estimate:
         if config.ue.ue_type == 'ensemble':
             do_predict_eval_ensemble(
-                model,
-                tokenizer,
-                trainer,
-                test_dataset, 
-                train_dataset,
-                calibration_dataset,
-                metric,
-                config,
-                work_dir,
-                model_args.model_name_or_path,
-                metric_fn,
-                max_seq_length,
+                num_labels,
+                model_args=model_args,
+                data_args=data_args,
+                ue_args=ue_args,
+                tokenizer=tokenizer,
+                trainer=trainer,
+                eval_dataset=eval_dataset,
+                train_dataset=train_dataset,
+                calibration_dataset=calibration_dataset,
+                eval_metric=metric,
+                config=config,
+                work_dir=work_dir,
             )
         else:
             do_predict_eval(
