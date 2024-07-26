@@ -153,6 +153,13 @@ class DataTrainingArguments:
                 validation_extension == train_extension
             ), "`validation_file` should have the same extension (csv or json) as `train_file`."
 
+class QWK_metric:
+    def __init__(self, num_labels):
+        self.num_labels = num_labels
+    
+    def compute(self, predictions, references):
+        qwk = cohen_kappa_score(references, predictions, labels=list(range(self.num_labels)), weights='quadratic')
+        return {'qwk':qwk}
 
 def calculate_dropouts(model):
     res = 0
@@ -191,6 +198,7 @@ def reset_params(model: torch.nn.Module):
             layer.reset_parameters()
         else:
             reset_params(model=layer)
+
 
 def do_predict_eval_ensemble(
     num_labels,
@@ -579,9 +587,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
             "glue", data_args.task_name, keep_in_memory=True, cache_dir=config.cache_dir
         )
     else:
-        metric = lambda trues, preds: cohen_kappa_score(
-            trues, preds, labels=list(range(num_labels)), weights='quadratic',
-        )
+        metric = QWK_metric(num_labels)
         #metric = load_metric(
         #    "accuracy", keep_in_memory=True, cache_dir=config.cache_dir
         #)
