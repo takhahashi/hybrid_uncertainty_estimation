@@ -697,5 +697,5 @@ class ExpEntropyTrainer(Trainer):
         #print(labels)
         #print(soft_labels)
         loss = r_loss + torch.mean(entropy.to(torch.float64))
-        self.log({f"exp_loss": r_loss, "entropy_loss":torch.mean(entropy)})
+        #self.log({f"exp_loss": r_loss, "entropy_loss":torch.mean(entropy)})
         return (loss, outputs) if return_outputs else loss
