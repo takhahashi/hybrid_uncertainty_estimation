@@ -178,3 +178,15 @@ class HybridModelCallback(TrainerCallback):
             scaled_loss = self.hb_model.diff_weights[k].to('cpu').detach().numpy().copy() * self.hb_model.scale_weights[k].to('cpu').detach().numpy().copy() * v[-1]
             each_task_loss = v[-1]
             self.trainer.log({f"{k}_scaled_loss": scaled_loss, f"{k}_loss":each_task_loss})
+
+class ExpEntCallback(TrainerCallback):
+    def __init__(self, trainer):
+        super().__init__()
+        self.trainer = trainer
+    
+    def on_epoch_end(self, args, state, control, **kwargs):
+        
+        self.trainer.log({f"exp_loss":np.mean(self.trainer.exp_loss_list), f"entropy":np.mean(self.trainer.entropy_list)})
+        self.trainer.exp_loss_list = []
+        self.trainer.entropy_list = []
+

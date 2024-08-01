@@ -683,6 +683,11 @@ class LabelDistributionTrainer(Trainer):
         return (y-k)**2
     
 class ExpEntropyTrainer(Trainer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exp_loss_list = []
+        self.entropy_list = []
+
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.pop("labels")
         # forward pass
@@ -697,5 +702,7 @@ class ExpEntropyTrainer(Trainer):
         #print(labels)
         #print(soft_labels)
         loss = r_loss + torch.mean(entropy.to(torch.float64))
+        self.exp_loss_list = np.append(self.exp_loss_list, r_loss.to('cpu').detach().numpy().copy())
+        self.entropy_list = np.append(self.entropy_list, torch.mean(entropy.to(torch.float64)).to('cpu').detach().numpy().copy())
         #self.log({f"exp_loss": r_loss, "entropy_loss":torch.mean(entropy)})
         return (loss, outputs) if return_outputs else loss

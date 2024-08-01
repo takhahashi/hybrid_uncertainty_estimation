@@ -49,7 +49,7 @@ from utils.utils_data import (
 from utils.utils_models import create_model
 from ue4nlp.transformers_regularized import SelectiveTrainer
 from utils.utils_tasks import get_config
-from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback
+from utils.utils_train import get_trainer, TrainingArgsWithLossCoefs, HybridModelCallback, ExpEntCallback
 
 import logging
 
@@ -398,6 +398,8 @@ def train_eval_glue_model(config, training_args, data_args, work_dir=None):
     )
     if model_args.model_type == 'hybrid':
         trainer.add_callback(HybridModelCallback(hb_model=model, trainer=trainer)) 
+    if ue_args.reg_type == 'ExpEntropyLearning':
+        trainer.add_callback(ExpEntCallback(trainer=trainer)) 
 
     
     if config.do_train:
