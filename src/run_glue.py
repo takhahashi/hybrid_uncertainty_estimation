@@ -237,11 +237,11 @@ def do_predict_eval_ensemble(
         preds = reg_output.squeeze()
         res = [preds, probs] + list(res)
 
-        answers_list.append(preds)
-        probs_list.append(probs)
+        answers_list.append(preds.tolist())
+        probs_list.append(probs.tolist())
         
-    eval_results["probabilities"] = np.mean(probs_list, axis=0).tolist()
-    answers = np.round(np.mean(answers_list, axis=0) * (num_labels - 1)).tolist()
+    eval_results["probabilities"] = probs_list
+    answers = answers_list * (num_labels - 1)
     eval_results["answers"] = answers
     eval_results["eval_score"] = eval_metric.compute(true_labels, answers)
 
