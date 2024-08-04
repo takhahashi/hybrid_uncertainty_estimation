@@ -239,12 +239,12 @@ def do_predict_eval_ensemble(
 
         answers_list.append(np.round(preds * (num_labels - 1)).tolist())
         probs_list.append(probs.tolist())
-        if model_id == 2:
+        if model_id == 1:
             break
         
     eval_results["probabilities"] = probs_list
     eval_results["answers"] = answers_list
-    eval_results["eval_score"] = eval_metric.compute(true_labels, np.round(np.mean(answers, axis=0)))
+    eval_results["eval_score"] = eval_metric.compute(true_labels, np.round(np.mean(answers_list, axis=0)))
 
 
     with open(Path(work_dir) / "dev_inference.json", "w") as res:
