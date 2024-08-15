@@ -319,6 +319,8 @@ def do_predict_eval(
             eval_results["answers"] = preds.tolist()
         elif config.model.model_type == 'normalregression':
             preds = res[:1]
+            print("========preds===========")
+            print(preds)
             eval_score = eval_metric.compute(predictions=preds, references=true_labels)
             log.info(f"Eval score: {eval_score}")
             eval_results["eval_score"] = eval_score
