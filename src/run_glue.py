@@ -321,6 +321,8 @@ def do_predict_eval(
             preds = res[:1]
             print("========preds===========")
             print(preds)
+            print("========true_labels===========")
+            print(true_labels)
             eval_score = eval_metric.compute(predictions=preds, references=true_labels)
             log.info(f"Eval score: {eval_score}")
             eval_results["eval_score"] = eval_score
