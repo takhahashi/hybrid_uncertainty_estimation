@@ -53,15 +53,6 @@ def init_wandb(directory, config, wandb_disabled=False):
             model_name = m_name
             break
 
-    if not wandb_disabled:
-        if "hybrid" == config.model.model_type:
-            inf_type = 'hybrid'
-        elif "regression" == config.model.model_type:
-            inf_type = 'regression'
-        elif "classification" == config.model.model_type:
-            inf_type = 'classification'
-        else:
-            raise ValueError(f"INVALID MODEL_TYPE: {config.model.model_type}")
 
     if wandb_disabled:
         project_name=None
