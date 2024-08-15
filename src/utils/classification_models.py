@@ -214,7 +214,7 @@ def create_bert(
             model = build_model(
                 BertForSequenceNormalRegression, model_path_or_name, **model_kwargs
             )
-            log.info("loaded ClassificationBERT constraction")
+            log.info("loaded NormalRegression constraction")
         else:
             raise ValueError(f"{model_config.model_type} IS INVALID MODEL_TYPE")
     return model
