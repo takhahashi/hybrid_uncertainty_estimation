@@ -73,7 +73,9 @@ class TextPredictor:
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
         elif self.model_type == 'normalregression':
-            pred_score = res[0][0]
+            print("================res============")
+            print(res)
+            pred_score = res[0]
         elif self.model_type == 'hybrid':
             if res[0][0][0].shape[0] == self._auto_model.num_labels:
                 logits = res[0][0]
