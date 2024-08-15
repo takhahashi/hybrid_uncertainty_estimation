@@ -125,4 +125,6 @@ class TextPredictor:
             return [preds, lnvar] + list(res)
         elif self.model_type == 'normalregression':
             preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
+            print("========preds=========-")
+            print(preds)
             return [preds] + list(res)
