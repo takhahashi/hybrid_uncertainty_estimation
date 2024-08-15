@@ -317,6 +317,12 @@ def do_predict_eval(
             eval_results["eval_score"] = eval_score
             eval_results["lnvar"] = lnvar.tolist()
             eval_results["answers"] = preds.tolist()
+        elif config.model.model_type == 'normalregression':
+            preds = res[:1]
+            eval_score = eval_metric.compute(predictions=preds, references=true_labels)
+            log.info(f"Eval score: {eval_score}")
+            eval_results["eval_score"] = eval_score
+            eval_results["answers"] = preds.tolist()
 
 
     end_eval_time = time.time()
@@ -670,7 +676,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
                 ue_args=ue_args,
                 tokenizer=tokenizer,
                 trainer=trainer,
-                eval_dataset=eval_dataset,
+                eval_dataset=test_dataset,
                 train_dataset=train_dataset,
                 calibration_dataset=calibration_dataset,
                 eval_metric=metric,
