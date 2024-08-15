@@ -318,7 +318,7 @@ def do_predict_eval(
             eval_results["lnvar"] = lnvar.tolist()
             eval_results["answers"] = preds.tolist()
         elif config.model.model_type == 'normalregression':
-            preds = res[:1]
+            preds = res[0]
             print("========preds===========")
             print(preds)
             print("========true_labels===========")
