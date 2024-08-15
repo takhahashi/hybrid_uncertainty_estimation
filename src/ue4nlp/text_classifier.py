@@ -72,6 +72,8 @@ class TextPredictor:
         if self.model_type == 'regression':
             pred_score = res[0][0]
             pred_lnvar = res[0][1]
+        elif self.model_type == 'normalregression':
+            pred_score = res[0][0]
         elif self.model_type == 'hybrid':
             if res[0][0][0].shape[0] == self._auto_model.num_labels:
                 logits = res[0][0]
@@ -121,4 +123,6 @@ class TextPredictor:
             preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
             lnvar = pred_lnvar
             return [preds, lnvar] + list(res)
-       
+        elif self.model_type == 'normalregression':
+            preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
+            return [preds] + list(res)
