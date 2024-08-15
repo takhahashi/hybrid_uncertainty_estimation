@@ -237,12 +237,13 @@ def do_predict_eval_ensemble(
         preds = reg_output.squeeze()
         res = [preds, probs] + list(res)
 
-        answers_list.append(np.round(preds * (num_labels - 1)).tolist())
+        answers_list.append(preds.tolist())
         probs_list.append(probs.tolist())
         
     eval_results["probabilities"] = probs_list
     eval_results["answers"] = answers_list
-    eval_results["eval_score"] = eval_metric.compute(true_labels, np.round(np.mean(answers_list, axis=0)))
+    #eval_results["eval_score"] = eval_metric.compute(true_labels, np.round(np.mean(answers_list, axis=0)))
+    eval_results["eval_score"] = None
 
 
     with open(Path(work_dir) / "dev_inference.json", "w") as res:
