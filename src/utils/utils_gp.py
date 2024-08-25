@@ -213,16 +213,14 @@ def train_eval_gp_model(config, training_args, data_args, work_dir=None):
             outputs = trainer.model(**inputs, output_hidden_states=True)
             test_hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
             test_labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
-        hidden_states = np.concatenate(hidden_states)
-        labels = np.concatenate(labels)
-        train_x = torch.FloatTensor(hidden_states)
-        train_y = torch.FloatTensor(labels)
+        test_x = torch.FloatTensor(np.concatenate(test_hidden_states))
+        test_y = torch.FloatTensor(np.concatenate(test_labels))
 
-        predictions = GPmodel(train_x)
+        predictions = GPmodel(test_x)
         mean = np.round(predictions.mean.cpu().detach().numpy())
         std = predictions.stddev.cpu().detach().numpy()
 
-        eval_results = {'true_labels':labels.tolist(), 'answers':mean.tolist(), 'std':std.tolist()}
+        eval_results = {'true_labels':test_y.tolist(), 'answers':mean.tolist(), 'std':std.tolist()}
 
         with open(Path(work_dir) / "dev_inference.json", "w") as res:
             json.dump(eval_results, res)
