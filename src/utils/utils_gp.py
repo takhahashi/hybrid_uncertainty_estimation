@@ -153,7 +153,7 @@ def train_eval_gp_model(config, training_args, data_args, work_dir=None):
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        compute_metrics=metric_fn,
+        compute_metrics=None,
         data_collator=data_collator,
     )
     train_dataloader = trainer.get_train_dataloader()
