@@ -68,7 +68,7 @@ def compute_metrics(is_regression, metric, label_num, p: EvalPrediction):
         result["combined_score"] = np.mean(list(result.values())).item()
 
     return result
-
+    
 def update_config(cfg_old, cfg_new):
     for k, v in cfg_new.items():
         if k in cfg_old.__dict__:
