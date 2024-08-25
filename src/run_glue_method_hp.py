@@ -17,6 +17,7 @@ import pickle
 import pdb
 
 from utils.utils_wandb import init_wandb, wandb
+from utils.utils_gp import train_eval_gp_model
 
 from ue4nlp.text_classifier import TextPredictor
 
@@ -489,12 +490,8 @@ def main(config):
     config.ue.use_cache=False
 
     if not os.path.exists(Path(auto_generated_dir) / filename):
-        pathdata = "/".join(
-            auto_generated_dir.split("/")[-7:-5] + auto_generated_dir.split("/")[-4:-3]
-        )
-        metric_path = f"../workdir/run_calc_ues_metrics_sn_20_old_net/{pathdata}/mahalanobis/metrics_rcc-auc.json"
-        if os.path.exists(metric_path):
-            log.info(f"Metric file: {metric_path} already exists \n")
+        if config.model.model_type == 'gp':
+            train_eval_gp_model(config, args_train, args_data, auto_generated_dir)
         else:
             train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
     else:
