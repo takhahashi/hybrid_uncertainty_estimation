@@ -68,7 +68,7 @@ def run_glue_for_model_series_fast(config, work_dir):
             if "fairlib" in str(model_series_dir):
                 # ensemble & fairlib case
                 model_path = Path(model_path) / "models"
-            if config.script == 'run_gp.py':
+            if config.model.model_type == 'gp':
                 model_path = Path(model_path) / "model"
         else:
             model_path = model_series_dir

@@ -772,9 +772,6 @@ def main(config):
     config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
         if config.model.model_type != 'gp':
-            print('====================')
-            print(config.model.model_type)
-            print('====================')
             train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
         else:
             train_eval_gp_model(config, args_train, args_data, auto_generated_dir)
