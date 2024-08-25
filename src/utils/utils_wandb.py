@@ -62,6 +62,8 @@ def init_wandb(directory, config, wandb_disabled=False):
             inf_type = 'classification'
         elif "normalregression" == config.model.model_type:
             inf_type = 'normalregression'
+        elif "gp" == config.model.model_type:
+            inf_type = 'gp'
         else:
             raise ValueError(f"INVALID MODEL_TYPE: {config.model.model_type}")
 
