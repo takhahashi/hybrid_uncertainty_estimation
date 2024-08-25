@@ -198,4 +198,4 @@ def train_eval_gp_model(config, training_args, data_args, work_dir=None):
                 GPmodel.likelihood.noise.item()
             ))
 
-        torch.save(GPmodel.state_dict(), work_dir)
+        torch.save(GPmodel.state_dict(), work_dir + '/model')
