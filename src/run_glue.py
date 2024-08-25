@@ -21,6 +21,7 @@ import time
 from sklearn.metrics import cohen_kappa_score
 
 from utils.utils_wandb import init_wandb, wandb
+from utils.utils_gp import train_eval_gp_model
 
 from ue4nlp.text_classifier import TextPredictor
 import pdb
@@ -770,7 +771,13 @@ def main(config):
         filename = "dev_inference.json"
     config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
-        train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
+        if config.model.model_type != 'gp':
+            print('====================')
+            print(config.model.model_type)
+            print('====================')
+            train_eval_glue_model(config, args_train, args_data, auto_generated_dir)
+        else
+            train_eval_gp_model(config, args_train, args_data, auto_generated_dir)
     else:
         log.info(f"Result file: {auto_generated_dir}/{filename} already exists \n")
 

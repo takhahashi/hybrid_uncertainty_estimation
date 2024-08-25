@@ -199,3 +199,34 @@ def train_eval_gp_model(config, training_args, data_args, work_dir=None):
             ))
 
         torch.save(GPmodel.state_dict(), work_dir + '/model')
+    
+    if config.do_eval:
+        GPmodel.load_state_dict(torch.load(config.model.model_name_or_path))
+        likelihood.eval()
+        GPmodel.eval()   
+
+        test_dataloader = trainer.get_test_dataloader(test_dataset)
+        test_hidden_states = []
+        test_labels = []     
+        trainer.model.eval()
+        for step, inputs in enumerate(test_dataloader):
+            outputs = trainer.model(**inputs, output_hidden_states=True)
+            test_hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
+            test_labels.append(inputs["labels"].to('cpu').detach().numpy().copy())
+        hidden_states = np.concatenate(hidden_states)
+        labels = np.concatenate(labels)
+        train_x = torch.FloatTensor(hidden_states)
+        train_y = torch.FloatTensor(labels)
+
+        predictions = GPmodel(train_x)
+        mean = np.round(predictions.mean.cpu().detach().numpy())
+        std = predictions.stddev.cpu().detach().numpy()
+
+        eval_results = {'true_labels':labels.tolist(), 'answers':mean.tolist(), 'std':std.tolist()}
+
+        with open(Path(work_dir) / "dev_inference.json", "w") as res:
+            json.dump(eval_results, res)
+
+        if wandb.run is not None:
+            wandb.save(str(Path(work_dir) / "dev_inference.json"))
+        print(eval_results)
