@@ -46,7 +46,10 @@ class UeEstimatorTrustscore:
             if sameclass_dist is None:
                 eval_results["trust_score"].append(float(0.))
             else:
-                trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
+                if (diffclass_dist + sameclass_dist) == 0:
+                    turst_score = 0.5
+                else:
+                    trust_score = diffclass_dist / (diffclass_dist + sameclass_dist)
                 if np.isnan(trust_score):
                     print("=================nanananananann==================")
                     print("diff_class_dist:", diffclass_dist)
