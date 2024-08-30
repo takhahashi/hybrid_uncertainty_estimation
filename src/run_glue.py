@@ -682,7 +682,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
                 ue_args=ue_args,
                 tokenizer=tokenizer,
                 trainer=trainer,
-                eval_dataset=test_dataset,
+                eval_dataset=train_dataset,
                 train_dataset=train_dataset,
                 calibration_dataset=calibration_dataset,
                 eval_metric=metric,
