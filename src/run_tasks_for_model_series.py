@@ -128,7 +128,7 @@ def run_glue_for_model_series_fast(config, work_dir):
         }
 
         tasks.append(task)
-        break
+
 
     config_path = Path(work_dir) / "config.yaml"
     config_structure = {}

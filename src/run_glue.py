@@ -247,11 +247,11 @@ def do_predict_eval_ensemble(
     eval_results["eval_score"] = None
 
 
-    with open(Path(work_dir) / "train_inference.json", "w") as res:
+    with open(Path(work_dir) / "dev_inference.json", "w") as res:
         json.dump(eval_results, res)
 
     if wandb.run is not None:
-        wandb.save(str(Path(work_dir) / "train_inference.json"))
+        wandb.save(str(Path(work_dir) / "dev_inference.json"))
     print(eval_results)
 
 def do_predict_eval(
@@ -682,7 +682,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
                 ue_args=ue_args,
                 tokenizer=tokenizer,
                 trainer=trainer,
-                eval_dataset=train_dataset,
+                eval_dataset=test_dataset,
                 train_dataset=train_dataset,
                 calibration_dataset=calibration_dataset,
                 eval_metric=metric,
@@ -768,7 +768,7 @@ def main(config):
     if config.do_train and not config.do_eval:
         filename = "pytorch_model.bin"
     else:
-        filename = "train_inference.json"
+        filename = "dev_inference.json"
     config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
         if config.model.model_type != 'gp':
