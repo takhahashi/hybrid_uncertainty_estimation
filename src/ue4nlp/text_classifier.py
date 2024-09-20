@@ -65,6 +65,7 @@ class TextPredictor:
         calibrate=False,
         apply_softmax=True,
         return_preds=True,
+        return_vec=False,
     ):
         self._auto_model.eval()
 
@@ -113,16 +114,35 @@ class TextPredictor:
             else:
                 probs = logits
 
+        hidden_states = []
+        if return_vec == True:
+            model = self._auto_model
+            trainer = self._trainer
+            model.eval()
+
+            log.info(
+                "****************Start calcurating hiddenstate on train dataset **************"
+            )
+            eval_dataloader = trainer.get_test_dataloader(eval_dataset)
+            hidden_states = []
+
+            for step, inputs in enumerate(eval_dataloader):
+                outputs = model(**inputs, output_hidden_states=True)
+                hidden_states.append(outputs.hidden_states[-1][:, 0, :].to('cpu').detach().numpy().copy())
+
+            hidden_states = np.concatenate(hidden_states)
+            hidden_states = list(hidden_states)
+            
         if self.model_type == 'hybrid':
             preds = np.round(reg_output.squeeze() * (self._auto_model.num_labels - 1))
-            return [preds, probs] + list(res)
+            return [preds, probs] + hidden_states + list(res)
         elif self.model_type == 'classification':
             preds = np.argmax(probs, axis=1)
-            return [preds, probs] + list(res)
+            return [preds, probs] + hidden_states + list(res)
         elif self.model_type == 'regression':
             preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
             lnvar = pred_lnvar
-            return [preds, lnvar] + list(res)
+            return [preds, lnvar] + hidden_states + list(res)
         elif self.model_type == 'normalregression':
             preds = np.round(pred_score.squeeze() * (self._auto_model.num_labels - 1))
-            return [preds] + list(res)
+            return [preds] + hidden_states + list(res)
