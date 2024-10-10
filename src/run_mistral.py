@@ -1,13 +1,10 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from transformers import pipeline
+from huggingface_hub import login
 
-messages = [
-    {"role": "system", "content": "You are a pirate chatbot who always responds in pirate speak!"},
-    {"role": "user", "content": "Who are you?"},
-]
-chatbot = pipeline("text-generation", model="mistralai/Mistral-Large-Instruct-2407")
-chatbot(messages)
+login(token="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")
+            
 
 
 model_id = "mistralai/Mistral-Large-Instruct-2407"
@@ -23,20 +20,20 @@ def get_current_weather(location: str, format: str):
     """
     pass
 
-conversation = [{"role": "user", "content": "What's the weather like in Paris?"}]
+conversation = [{"role": "user", "content": "アフロジャックについて教えて"}]
 tools = [get_current_weather]
 
 # format and tokenize the tool use prompt 
 inputs = tokenizer.apply_chat_template(
             conversation,
-            tools=tools,
+            #tools=tools,
             add_generation_prompt=True,
             return_dict=True,
             return_tensors="pt",
 )
 
 model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, device_map="auto")
-
+print(model.device)
 inputs.to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=1000)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
