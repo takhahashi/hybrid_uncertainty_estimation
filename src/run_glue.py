@@ -297,10 +297,6 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax, return_vec=True)
-        raw_res = trainer.predict(eval_dataset)
-        print("==================raw_res================")
-        print(raw_res)
-        print(raw_res['hidden_states'])
 
         if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
             preds, probs = res[:2]
@@ -368,11 +364,11 @@ def do_predict_eval(
                 "ue_time": end_ue_time - start_ue_time,
             }
         )
-    with open(Path(work_dir) / "train_inference_test.json", "w") as res:
+    with open(Path(work_dir) / "train_inference.json", "w") as res:
         json.dump(eval_results, res)
 
     if wandb.run is not None:
-        wandb.save(str(Path(work_dir) / "train_inference_test.json"))
+        wandb.save(str(Path(work_dir) / "train_inference.json"))
     print(eval_results)
 
 
@@ -772,7 +768,7 @@ def main(config):
     if config.do_train and not config.do_eval:
         filename = "pytorch_model.bin"
     else:
-        filename = "train_inference_test.json"
+        filename = "train_inference.json"
     config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
         if config.model.model_type != 'gp':
