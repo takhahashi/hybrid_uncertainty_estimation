@@ -5,7 +5,7 @@ import json
 import numpy as np
 import collections
 import shutil
-from datasets import Dataset, DatasetDict, load_dataset, load_metric, load_from_disk
+from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.preprocessing import LabelEncoder
