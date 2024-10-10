@@ -298,6 +298,7 @@ def do_predict_eval(
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax, return_vec=True)
         raw_res = trainer.predict(eval_dataset)
+        print("==================raw_res================")
         print(raw_res)
         print(raw_res['hidden_states'])
 
@@ -367,11 +368,11 @@ def do_predict_eval(
                 "ue_time": end_ue_time - start_ue_time,
             }
         )
-    with open(Path(work_dir) / "train_inference.json", "w") as res:
+    with open(Path(work_dir) / "train_inference_test.json", "w") as res:
         json.dump(eval_results, res)
 
     if wandb.run is not None:
-        wandb.save(str(Path(work_dir) / "train_inference.json"))
+        wandb.save(str(Path(work_dir) / "train_inference_test.json"))
     print(eval_results)
 
 
@@ -697,7 +698,7 @@ def train_eval_glue_model(config, training_args, data_args, work_dir):
                 model,
                 tokenizer,
                 trainer,
-                train_dataset, ##############
+                test_dataset, ##############
                 train_dataset,
                 calibration_dataset,
                 metric,
@@ -771,7 +772,7 @@ def main(config):
     if config.do_train and not config.do_eval:
         filename = "pytorch_model.bin"
     else:
-        filename = "train_inference.json"
+        filename = "train_inference_test.json"
     config.ue.use_cache=False
     if not os.path.exists(Path(auto_generated_dir) / filename):
         if config.model.model_type != 'gp':
