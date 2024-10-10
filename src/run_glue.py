@@ -297,7 +297,10 @@ def do_predict_eval(
             bool(config.apply_softmax) if ("apply_softmax" in config.keys()) else True
         )
         res = cls.predict(eval_dataset, apply_softmax=apply_softmax, return_vec=True)
-    
+        raw_res = trainer.predict(eval_dataset)
+        print(raw_res)
+        print(raw_res['hidden_states'])
+
         if config.model.model_type == 'classification' or config.model.model_type == 'hybrid':
             preds, probs = res[:2]
 
